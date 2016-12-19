@@ -1,0 +1,111 @@
+use sdl2;
+use sdl2::render::{Renderer, TextureQuery};
+use sdl2::rect::{Point, Rect};
+use sdl2::pixels::Color;
+use sdl2::event::Event;
+use sdl2::ttf::Font;
+use sdl2::keyboard::Keycode;
+
+use canvas::Canvas;
+use pixel::Pixel;
+
+use std::path::Path;
+
+pub struct SDL2Canvas<'a> {
+    renderer: Renderer<'a>,
+    font: Font<'a>,
+}
+
+impl <'a> SDL2Canvas<'a> {
+    fn new(renderer: Renderer<'a>, font: Font<'a>) -> Self {
+        SDL2Canvas { renderer: renderer, font: font }
+    }
+
+    // SDL2 uses top left as origin, Axis2D assumes a bottom left
+    // origin
+    fn convert_to_bottom_left_origin<P: Into<Pixel>>(&self, p: P) -> Pixel {
+        let (_, h) = self.get_size();
+        let p = p.into();
+
+        Pixel::new(p.x, (h - p.y).abs())
+    }
+}
+
+impl <'a> Canvas for SDL2Canvas<'a> {
+    fn get_origin(&self) -> Pixel {
+        Pixel::new(0.0, 0.0)
+    }
+
+    fn get_size(&self) -> (f64, f64) {
+        // see comment below for explanation
+        let point = self.renderer.viewport().bottom_right();
+        (point.x() as f64, point.y() as f64)
+    }
+
+    fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P) {
+        let Pixel { x: x1, y: y1 } = self.convert_to_bottom_left_origin(start);
+        let Pixel { x: x2, y: y2 } = self.convert_to_bottom_left_origin(end);
+
+        self.renderer.draw_line(Point::new(x1 as i32, y1 as i32), Point::new(x2 as i32, y2 as i32));
+    }
+
+    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left_corner: P) {
+        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
+        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+
+        let TextureQuery { width, height, .. } = texture.query();
+        let pix = self.convert_to_bottom_left_origin(bottom_left_corner);
+        let r = Rect::new(pix.x as i32, pix.y as i32, width, height);
+        self.renderer.copy(&texture, None, Some(r)).unwrap();
+    }
+    
+    fn clear(&mut self) {
+        self.renderer.clear();
+    }
+
+    fn show(&mut self) {
+        self.renderer.present();
+    }
+
+    fn set_color(&mut self, r: u8, g: u8, b: u8) {
+        self.renderer.set_draw_color(Color::RGB(r, g, b));
+    }
+}
+
+pub fn with_sdl2_renderer<F>(w: u32, h: u32, f: F)
+    where F: Fn(&mut SDL2Canvas) {
+
+        let sdl_context = sdl2::init().unwrap();
+        let ttf_context = sdl2::ttf::init().unwrap();
+        let video_subsystem = sdl_context.video().unwrap();
+
+        let window = video_subsystem.window("rust-sdl2 demo: Video", w, h)
+            .position_centered()
+            .opengl()
+            .build()
+            .unwrap();
+
+        let mut renderer = window.renderer().build().unwrap();
+        renderer.set_draw_color(Color::RGB(255, 255, 255));
+        renderer.clear();
+        renderer.present();
+        renderer.set_draw_color(Color::RGB(0, 0, 0));
+
+        let font = ttf_context.load_font(Path::new("./Ubuntu-R.ttf"), 8).unwrap();
+        let mut canvas = SDL2Canvas::new(renderer, font);
+
+        f(&mut canvas);
+
+        let mut event_pump = sdl_context.event_pump().unwrap();
+
+        'running: loop {
+            for event in event_pump.poll_iter() {
+                match event {
+                    Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                        break 'running
+                    },
+                    _ => {}
+                }
+            }
+        }
+    }
