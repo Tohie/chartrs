@@ -1,5 +1,5 @@
 [package]
-name = "graphrs"
+name = "chartrs"
 version = "0.1.0"
 authors = ["Tohie <scottdjwales@gmail.com>"]
 
