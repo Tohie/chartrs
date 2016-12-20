@@ -1,8 +1,8 @@
 pub mod sdl2_canvas;
 
-pub use self::sdl2_canvas::with_sdl2_renderer;
+pub use self::sdl2_canvas::with_sdl2_context;
 
-use pixel::Pixel;
+use pixel::{Pixel, Color};
 
 pub trait Canvas {
     fn get_origin(&self) -> Pixel;
@@ -10,9 +10,13 @@ pub trait Canvas {
 
     fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P);
     fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left_corner: P);
+    fn write_num<P: Into<Pixel>>(&mut self, t: f64, p: P) {
+        let t = format!("{}", t);
+        self.write_text(&t, p);
+    }
 
     fn clear(&mut self);
     fn show(&mut self);
 
-    fn set_color(&mut self, r: u8, g: u8, b: u8);
+    fn set_color<C: Into<Color>>(&mut self, color: C);
 }

@@ -1,13 +1,16 @@
-use pixel::GraphCoord;
-use graph::PointStyle;
+use pixel::{GraphCoord, Color};
+use graph::DataSetOptions;
+use utils;
+use rand;
+use rand::Rng;
 
-pub struct DataSet  {
+pub struct DataSet<'a> {
     pub data_points: Vec<GraphCoord>,
-    pub point_style: PointStyle,
+    pub options: &'a DataSetOptions<'a>,
 }
 
-impl DataSet {
-    pub fn from_fn<F>(x: Vec<f64>, f: F) -> Self 
+impl <'a> DataSet<'a> {
+    pub fn from_fn<F>(x: Vec<f64>, opts: &'a DataSetOptions<'a>, f: F) -> Self 
         where F: Fn(f64) -> f64 {
         
         let xc = x.clone();
@@ -16,29 +19,28 @@ impl DataSet {
 
         DataSet {
             data_points: pixels,
-            point_style: PointStyle::Nothing,
+            options: opts,
         }
     }
 
-    pub fn get_max_x_and_y(&self) -> (f64, f64) {
-        self.find_x_and_y_by_predicate(|x_curr, x_max| x_curr > x_max)
+    pub fn get_max_coord(&self) -> GraphCoord {
+        utils::get_max_coord(&self.data_points)
     }
 
-    pub fn get_min_x_and_y(&self) -> (f64, f64) {
-        self.find_x_and_y_by_predicate(|x_curr, x_min| x_curr < x_min)
+    pub fn get_min_coord(&self) -> GraphCoord {
+        utils::get_min_coord(&self.data_points)
     }
 
-    fn find_x_and_y_by_predicate<F>(&self, f: F) -> (f64, f64)
-        where F: Fn(f64, f64) -> bool {
-
-        self.data_points.iter().fold((0.0, 0.0), |(x, y), px| {
-            (if f(px.x, x) { px.x } else { x }, if f(px.y, y) { px.y } else { y })
-        })
-    }
-
-    pub fn set_point_style<'a>(&'a mut self, point_style: PointStyle) -> &'a mut Self {
-        self.point_style = point_style;
-        self
+    pub fn choose_color(&self) -> Color {
+        if !self.options.random_color {
+            self.options.color
+        } else {
+            let mut rng = rand::thread_rng();
+            match self.options.colors {
+                Some(choices) => *rng.choose(choices).unwrap_or(&Color(0, 0, 0)),
+                None => rng.gen::<Color>(),
+            }
+        }    
     }
 }
 

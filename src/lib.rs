@@ -1,12 +1,14 @@
 extern crate sdl2;
+extern crate rand;
 
 pub mod graph;
 pub mod pixel;
 pub mod canvas;
+mod utils;
 
 pub use pixel::Pixel;
 pub use canvas::Canvas;
-pub use graph::{Graph2D, DataSet, Axis2D, Graph, PlotStyle, PointStyle};
+pub use graph::{Graph2D, DataSet, Graph, PlotStyle, PointStyle, PlotOptions, DataSetOptions};
 
 
 #[cfg(test)]
@@ -14,6 +16,7 @@ mod tests {
     use canvas::Canvas;
     use pixel::Pixel;
 
+    /*
     pub struct FakeCanvas {}
 
     impl Canvas for FakeCanvas {
@@ -30,4 +33,5 @@ mod tests {
         fn show(&mut self) {}
         fn set_color(&mut self, r: u8, g: u8, b: u8) {}
     }
+    */
 }

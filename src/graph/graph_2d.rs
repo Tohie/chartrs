@@ -1,23 +1,40 @@
 use graph::data_set::DataSet;
-use graph::{Graph, PlotStyle, PointStyle};
+use graph::{Graph, PlotStyle, PlotOptions, DataSetOptions};
 use graph::axis_2d::Axis2D;
-use pixel::GraphCoord;
+use pixel::{GraphCoord, Color};
 use canvas::Canvas;
+use utils;
 
 /// A Graph2D is a graph with a standard 2d axis, i.e. a bar, line or a scatter graph
-pub struct Graph2D<'a, T: 'a> {
-    data_set: &'a DataSet,
-    axis: &'a mut Axis2D<'a, T>,
-    plot_style: PlotStyle,
+pub struct Graph2D<'a: 'c, 'b, 'c, T: 'a> {
+    data_sets: &'c [&'a DataSet<'a>],
+    axis: Axis2D<'a, T>,
+    plot_options: PlotOptions<'b>,
 }
 
-impl <'a, T: Canvas> Graph2D<'a, T> {
-    pub fn new(data_set: &'a DataSet, axis: &'a mut Axis2D<'a, T>, style: PlotStyle) -> Self {
-        Graph2D { data_set: data_set, axis: axis, plot_style: style, }
+impl <'a, 'b, 'c, T: Canvas> Graph2D<'a, 'b, 'c, T> {
+    pub fn new(canvas: &'a mut T, data_sets: &'c [&'a DataSet<'a>], options: PlotOptions<'b>) -> Self {
+        let max_coords = data_sets.iter()
+            .map(|ds| ds.get_max_coord())
+            .collect::<Vec<GraphCoord>>();
+
+        let max_coord = utils::get_max_coord(&max_coords);
+
+        let min_coords = data_sets.iter()
+            .map(|ds| ds.get_min_coord())
+            .collect::<Vec<GraphCoord>>();
+
+        let min_coord = utils::get_min_coord(&min_coords);
+
+        let mut axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, canvas);
+        axis.set_horizontal_border(options.horizontal_border);
+        axis.set_vertical_border(options.vertical_border);
+        Graph2D { data_sets: data_sets, axis: axis, plot_options: options, }
     }
 
-    fn plot_line_graph(&mut self) {
-        for pair in self.data_set.data_points.windows(2) {
+    fn plot_line_graph(&mut self, ds: &'a DataSet<'a>) {
+        for pair in ds.data_points.windows(2) {
+            self.update_color(ds);
             self.axis.plot_line(pair[0], pair[1]);
         }
     }
@@ -29,41 +46,59 @@ impl <'a, T: Canvas> Graph2D<'a, T> {
         self.axis.plot_line((x - 0.5, 0.0), (x - 0.5, y));
         self.axis.plot_line((x - 0.5, y), (x + 0.5, y));
         self.axis.plot_line((x + 0.5, y), (x + 0.5, 0.0));
+        self.axis.plot_line((x - 0.5, 0.0), (x + 0.5, 0.0));
     }
 
-    fn plot_bar_graph(&mut self) {
-        for &point in self.data_set.data_points.iter() {
+    fn plot_bar_graph(&mut self, ds: &'a DataSet<'a>) {
+        for &point in ds.data_points.iter() {
+            self.update_color(ds);
             self.plot_point_as_bar(point);
         }
     }
 
-    fn plot_scatter_graph(&mut self) {
-        for &point in self.data_set.data_points.iter() {
-            self.axis.plot_point(point, self.data_set.point_style);
+    fn plot_scatter_graph(&mut self, ds: &'a DataSet<'a>) {
+        for &point in ds.data_points.iter() {
+            self.update_color(ds);
+            self.axis.plot_point(point, ds.options.point_style);
         }
     }
 
     /// Convenience method that creates an axis and a data_set
     /// from the arguments provided and plots it
-    pub fn plot_fn<F>(c: &'a mut T, plot_style: PlotStyle, xs: Vec<f64>, f: F) 
+    pub fn plot_fn<F>(c: &'a mut T, data_set_opts: &'a DataSetOptions<'a>, plot_options: PlotOptions<'b>, xs: Vec<f64>, f: F) 
         where F: Fn(f64) -> f64 {
 
-        let ds = DataSet::from_fn(xs, f);
-        let mut axis = Axis2D::new(&ds, c);
+        let ds = DataSet::from_fn(xs, data_set_opts, f);
+        let data_sets = &[&ds];
 
-        let mut graph = Graph2D::new(&ds, &mut axis, plot_style);
+        let mut graph = Graph2D::new(c, data_sets, plot_options);
         graph.plot();
     }
-}
 
-impl <'a, T: Canvas> Graph for Graph2D<'a, T> {
-    fn plot(&mut self) {
-        match self.plot_style {
-            PlotStyle::Line => self.plot_line_graph(),
-            PlotStyle::Bar => self.plot_bar_graph(),
-            PlotStyle::Scatter => self.plot_scatter_graph(),
+    pub fn update_color(&mut self, ds: &'a DataSet<'a>) {
+        self.axis.set_color(ds.choose_color());
+    }
+
+    pub fn plot_data_set(&mut self, ds: &'a DataSet) {
+        match ds.options.plot_style {
+            PlotStyle::Line => self.plot_line_graph(ds),
+            PlotStyle::Bar => self.plot_bar_graph(ds),
+            PlotStyle::Scatter => self.plot_scatter_graph(ds),
         }
 
         self.axis.show();
+    }
+}
+
+impl <'a, 'b, 'c, T: Canvas> Graph for Graph2D<'a, 'b, 'c, T> {
+    fn plot(&mut self) {
+        self.axis.set_color(Color(0, 0, 0));
+        self.axis.plot_axises(self.plot_options.tick_count);
+        self.axis.write_xlabel(self.plot_options.x_label);
+        self.axis.write_ylabel(self.plot_options.y_label);
+
+        for ds in self.data_sets {
+            self.plot_data_set(ds);
+        } 
     }
 }

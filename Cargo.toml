@@ -6,3 +6,6 @@ authors = ["Tohie <scottdjwales@gmail.com>"]
 [dependencies.sdl2]
 version = "0.27"
 features = ["ttf"]
+
+[dependencies]
+rand = "0.3.15"

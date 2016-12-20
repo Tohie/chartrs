@@ -7,6 +7,7 @@ use sdl2::ttf::Font;
 use sdl2::keyboard::Keycode;
 
 use canvas::Canvas;
+use pixel;
 use pixel::Pixel;
 
 use std::path::Path;
@@ -37,7 +38,6 @@ impl <'a> Canvas for SDL2Canvas<'a> {
     }
 
     fn get_size(&self) -> (f64, f64) {
-        // see comment below for explanation
         let point = self.renderer.viewport().bottom_right();
         (point.x() as f64, point.y() as f64)
     }
@@ -67,12 +67,13 @@ impl <'a> Canvas for SDL2Canvas<'a> {
         self.renderer.present();
     }
 
-    fn set_color(&mut self, r: u8, g: u8, b: u8) {
+    fn set_color<C: Into<pixel::Color>>(&mut self, color: C) {
+        let pixel::Color(r, g, b) = color.into();
         self.renderer.set_draw_color(Color::RGB(r, g, b));
     }
 }
 
-pub fn with_sdl2_renderer<F>(w: u32, h: u32, f: F)
+pub fn with_sdl2_context<F>(w: u32, h: u32, font_size: u16, f: F)
     where F: Fn(&mut SDL2Canvas) {
 
         let sdl_context = sdl2::init().unwrap();
@@ -91,7 +92,7 @@ pub fn with_sdl2_renderer<F>(w: u32, h: u32, f: F)
         renderer.present();
         renderer.set_draw_color(Color::RGB(0, 0, 0));
 
-        let font = ttf_context.load_font(Path::new("./Ubuntu-R.ttf"), 8).unwrap();
+        let font = ttf_context.load_font(Path::new("./Ubuntu-R.ttf"), font_size).unwrap();
         let mut canvas = SDL2Canvas::new(renderer, font);
 
         f(&mut canvas);
