@@ -5,7 +5,7 @@ use pixel::{GraphCoord, Color};
 use canvas::Canvas;
 use utils;
 
-/// A Graph2D is a graph with a standard 2d axis, i.e. a bar, line or a scatter graph
+/// A `Graph2D` is a graph with a standard 2d axis, i.e. a bar, line or a scatter graph
 pub struct Graph2D<'a: 'c, 'b, 'c, T: 'a> {
     data_sets: &'c [&'a DataSet<'a>],
     axis: Axis2D<'a, T>,

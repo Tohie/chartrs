@@ -4,6 +4,7 @@ use canvas::Canvas;
 use pixel::{Pixel, GraphCoord, Color};
 
 /// The Axis2D represents a 2D axis for a line or bar graph
+/// This should be constructed for you automatically by a Graph2D
 pub struct Axis2D<'a, T: 'a> {
     /// max_x is the largest value that will be plotted on the x axis
     max_x: f64,

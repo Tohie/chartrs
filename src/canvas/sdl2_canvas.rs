@@ -12,6 +12,10 @@ use pixel::Pixel;
 
 use std::path::Path;
 
+/// `SDL2Canvas` is a struct that holds an sdl2 font and renderer
+/// which are required to fully implement the `Canvas` trait
+/// See the `Canvas` trait documentation for an explanation of what these functions
+/// do.
 pub struct SDL2Canvas<'a> {
     renderer: Renderer<'a>,
     font: Font<'a>,
@@ -73,6 +77,18 @@ impl <'a> Canvas for SDL2Canvas<'a> {
     }
 }
 
+/// This is a convenience function
+/// It will construct a window with given width and height
+/// then pass an `SDL2Canvas` to the function given which allows a graph to be
+/// drawn, it will then loop until the window is closed or esc is pressed
+/// 
+/// # Example
+///
+/// ```
+/// with_sdl2_context(600, 800, 12, |ctx| {
+///     // ctx is an SDL2Canvas which can be used to plot
+/// });
+/// ```
 pub fn with_sdl2_context<F>(w: u32, h: u32, font_size: u16, f: F)
     where F: Fn(&mut SDL2Canvas) {
 

@@ -4,12 +4,17 @@ use utils;
 use rand;
 use rand::Rng;
 
+/// `DataSet` represents a series on a 2D graph
+/// `DataSet` holds a vector of x and y co-ordinates for a graph
+/// as well as a series of options such as the colour to draw the line
 pub struct DataSet<'a> {
     pub data_points: Vec<GraphCoord>,
     pub options: &'a DataSetOptions<'a>,
 }
 
 impl <'a> DataSet<'a> {
+    /// Takes vector of x co-ordinates as well as options and then uses the given 
+    /// function f to create a vector of `GraphCoord`
     pub fn from_fn<F>(x: Vec<f64>, opts: &'a DataSetOptions<'a>, f: F) -> Self 
         where F: Fn(f64) -> f64 {
         
@@ -23,6 +28,8 @@ impl <'a> DataSet<'a> {
         }
     }
 
+    /// Gets the maximum value of x and maximum value of y
+    /// and returns them as a `GraphCoord`
     pub fn get_max_coord(&self) -> GraphCoord {
         utils::get_max_coord(&self.data_points)
     }
@@ -31,6 +38,9 @@ impl <'a> DataSet<'a> {
         utils::get_min_coord(&self.data_points)
     }
 
+    /// Using the options specified in the options field
+    /// chooses the color that should be used to draw this
+    /// `DataSet`
     pub fn choose_color(&self) -> Color {
         if !self.options.random_color {
             self.options.color

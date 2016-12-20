@@ -1,3 +1,32 @@
+//! The `chartrs` crate is used for creating and drawing graphs in rust
+//! The canvas module containts the `Canvas` trait
+//! anything implementing the `Canvas` trait can be used to draw
+//! a graph using this crate
+//! The graph module contains a `DataSet` struct which holds
+//! the data for a graph as well as any options such as what colour to draw the graph
+//! The `Graph2D` is the main struct in this crate, it holds several DataSets
+//! and an axis to plot a graph.
+//!
+//! An example usage of how this ties together:
+//! 
+//! # Examples
+//!
+//! ```rust
+//! # extern crate sdl2;
+//! use chartrs::canvas::with_sdl2_context;
+//! use chartrs::{Graph2D, DataSetOptions};
+//!
+//! fn main() {
+//!     let font_size = 12;
+//!     with_sdl2_context(800, 600, font_size, |ctx| {
+//!         // See the DataSetOptions and PlotOptions structs for the available options
+//!         // The default here is to plot a line graph in black
+//!         Graph2D::plot_fn(ctx, DataSetOptions::default(), PlotOptions::default(), 
+//!             vec!(-1.0, 0, 1.0, 2.0, 3.0, 4.0), |x| x.powi(2));
+//!     }
+//! }
+//! ```
+
 extern crate sdl2;
 extern crate rand;
 
@@ -9,29 +38,3 @@ mod utils;
 pub use pixel::Pixel;
 pub use canvas::Canvas;
 pub use graph::{Graph2D, DataSet, Graph, PlotStyle, PointStyle, PlotOptions, DataSetOptions};
-
-
-#[cfg(test)]
-mod tests {
-    use canvas::Canvas;
-    use pixel::Pixel;
-
-    /*
-    pub struct FakeCanvas {}
-
-    impl Canvas for FakeCanvas {
-        fn get_origin(&self) -> Pixel {
-            Pixel { x: 0f64, y: 0f64, }
-        }
-        
-        fn get_size(&self) -> (f64, f64) {
-            (600, 800)
-        }
-
-        fn clear (&mut self) {}
-        fn draw_line(&self, start: Pixel, end: Pixel) {}
-        fn show(&mut self) {}
-        fn set_color(&mut self, r: u8, g: u8, b: u8) {}
-    }
-    */
-}

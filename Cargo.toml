@@ -3,6 +3,14 @@ name = "chartrs"
 version = "0.1.0"
 authors = ["Tohie <scottdjwales@gmail.com>"]
 
+[lib]
+name = "chartrs"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chart_example"
+path = "src/main.rs"
+
 [dependencies.sdl2]
 version = "0.27"
 features = ["ttf"]

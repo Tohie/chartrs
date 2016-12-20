@@ -1,3 +1,7 @@
+//! This module defines types that will be used to create common types
+//! such as pixels or colours, in order to make arguments to functions
+//! clearer
+
 use rand::{Rand, Rng};
 
 /// The Pixel type, this represents an (x, y) location on the screen

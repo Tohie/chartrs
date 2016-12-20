@@ -7,6 +7,8 @@ pub use self::graph_2d::Graph2D;
 
 use pixel::Color;
 
+/// `PlotStyle` determines whether a `Graph2D` should be plotted
+/// as a Bar, Line or Scatter graph
 #[derive(Clone, Copy, PartialEq)]
 pub enum PlotStyle {
     Bar,
@@ -14,6 +16,8 @@ pub enum PlotStyle {
     Scatter,  
 }
 
+/// `PointStyle` specifies whether markers should be drawn
+/// for each point and if so what kind of marker 
 #[derive(Clone, Copy, PartialEq)]
 pub enum PointStyle {
     Nothing,
@@ -21,17 +25,45 @@ pub enum PointStyle {
     // could have circle, etc.
 }
 
+/// `PlotOptions` contains options that are specific to the graph
+/// and not a particular series such as any labels, borders or grids
+/// 
+/// # Example
+/// 
+/// ```
+/// let opts = PlotOptions::new()
+///     .tick_count(8)
+///     .x_label("this is my x label")
+///     .title("my graph")
+/// ```
+///
 #[derive(Clone, PartialEq)]
 pub struct PlotOptions<'a> {
+    /// The amount of ticks to display on the x and y axis
     pub tick_count: f64,
+
+    /// A label that will be displayed on the x axis
+    /// it will be placed halfway between the maximum x
+    /// value and the origin just below the x axis
     pub x_label: &'a str,
+
     pub y_label: &'a str,
+    
+    /// The title of the graph, will be drawn at the top of the positive x and y 
+    /// quadrant
     pub title: &'a str,
+
+    /// `horizontal_border` is the percentage of the horizontal space
+    /// that should be used a border each side
+    /// i.e. if `horizontal_border = 0.1` then there will be a 10% border of
+    /// whitespace on each side of the canvas 
     pub horizontal_border: f64,
     pub vertical_border: f64,
 }
 
 impl <'a> PlotOptions<'a> {
+    /// Creates a new PlotOptions using the default values specified
+    /// by the implementation of Default by this struct
     pub fn new() -> PlotOptions<'a> {
         PlotOptions::default()
     }
