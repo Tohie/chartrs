@@ -1,9 +1,9 @@
 extern crate sdl2;
-extern crate graphrs;
+extern crate chartrs;
 
-use graphrs::canvas::with_sdl2_context;
-use graphrs::pixel::Color;
-use graphrs::{Graph2D, PlotOptions, DataSetOptions, PlotStyle, PointStyle, DataSet, Graph};
+use chartrs::canvas::with_sdl2_context;
+use chartrs::pixel::Color;
+use chartrs::{Graph2D, PlotOptions, DataSetOptions, PlotStyle, PointStyle, DataSet, Graph};
 
 fn main() {
     let font_size = 12;
