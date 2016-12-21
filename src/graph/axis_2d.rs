@@ -1,4 +1,3 @@
-use graph::data_set::DataSet;
 use graph::{PointStyle, AxisOptions};
 use canvas::Canvas;
 use pixel::{Pixel, GraphCoord, Color};

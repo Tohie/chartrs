@@ -25,7 +25,7 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
 
         let min_coord = utils::get_min_coord(&min_coords);
 
-        let mut axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, axis_options, canvas);
+        let axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, axis_options, canvas);
         Graph2D { data_sets: data_sets, axis: axis, }
     }
 
