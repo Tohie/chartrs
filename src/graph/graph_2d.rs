@@ -1,19 +1,18 @@
 use graph::data_set::DataSet;
-use graph::{Graph, PlotStyle, PlotOptions, DataSetOptions};
+use graph::{Graph, PlotStyle, AxisOptions, DataSetOptions};
 use graph::axis_2d::Axis2D;
 use pixel::{GraphCoord, Color};
 use canvas::Canvas;
 use utils;
 
 /// A `Graph2D` is a graph with a standard 2d axis, i.e. a bar, line or a scatter graph
-pub struct Graph2D<'a: 'c, 'b, 'c, T: 'a> {
+pub struct Graph2D<'a: 'c, 'b, 'c, 'd, T: 'b> {
     data_sets: &'c [&'a DataSet<'a>],
-    axis: Axis2D<'a, T>,
-    plot_options: PlotOptions<'b>,
+    axis: Axis2D<'b, 'd, T>,
 }
 
-impl <'a, 'b, 'c, T: Canvas> Graph2D<'a, 'b, 'c, T> {
-    pub fn new(canvas: &'a mut T, data_sets: &'c [&'a DataSet<'a>], options: PlotOptions<'b>) -> Self {
+impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
+    pub fn new(canvas: &'b mut T, data_sets: &'c [&'a DataSet<'a>], axis_options: AxisOptions<'d>) -> Self {
         let max_coords = data_sets.iter()
             .map(|ds| ds.get_max_coord())
             .collect::<Vec<GraphCoord>>();
@@ -26,10 +25,8 @@ impl <'a, 'b, 'c, T: Canvas> Graph2D<'a, 'b, 'c, T> {
 
         let min_coord = utils::get_min_coord(&min_coords);
 
-        let mut axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, canvas);
-        axis.set_horizontal_border(options.horizontal_border);
-        axis.set_vertical_border(options.vertical_border);
-        Graph2D { data_sets: data_sets, axis: axis, plot_options: options, }
+        let mut axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, axis_options, canvas);
+        Graph2D { data_sets: data_sets, axis: axis, }
     }
 
     fn plot_line_graph(&mut self, ds: &'a DataSet<'a>) {
@@ -65,7 +62,7 @@ impl <'a, 'b, 'c, T: Canvas> Graph2D<'a, 'b, 'c, T> {
 
     /// Convenience method that creates an axis and a data_set
     /// from the arguments provided and plots it
-    pub fn plot_fn<F>(c: &'a mut T, data_set_opts: &'a DataSetOptions<'a>, plot_options: PlotOptions<'b>, xs: Vec<f64>, f: F) 
+    pub fn plot_fn<F>(c: &'a mut T, data_set_opts: &'a DataSetOptions<'a>, plot_options: AxisOptions<'b>, xs: Vec<f64>, f: F) 
         where F: Fn(f64) -> f64 {
 
         let ds = DataSet::from_fn(xs, data_set_opts, f);
@@ -90,12 +87,10 @@ impl <'a, 'b, 'c, T: Canvas> Graph2D<'a, 'b, 'c, T> {
     }
 }
 
-impl <'a, 'b, 'c, T: Canvas> Graph for Graph2D<'a, 'b, 'c, T> {
+impl <'a, 'b, 'c, 'd, T: Canvas> Graph for Graph2D<'a, 'b, 'c, 'd, T> {
     fn plot(&mut self) {
         self.axis.set_color(Color(0, 0, 0));
-        self.axis.plot_axises(self.plot_options.tick_count);
-        self.axis.write_xlabel(self.plot_options.x_label);
-        self.axis.write_ylabel(self.plot_options.y_label);
+        self.axis.plot_axises();
 
         for ds in self.data_sets {
             self.plot_data_set(ds);

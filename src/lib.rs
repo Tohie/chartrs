@@ -37,4 +37,4 @@ mod utils;
 
 pub use pixel::Pixel;
 pub use canvas::Canvas;
-pub use graph::{Graph2D, DataSet, Graph, PlotStyle, PointStyle, PlotOptions, DataSetOptions};
+pub use graph::{Graph2D, DataSet, Graph, PlotStyle, PointStyle, AxisOptions, DataSetOptions};

@@ -1,11 +1,11 @@
 use graph::data_set::DataSet;
-use graph::PointStyle;
+use graph::{PointStyle, AxisOptions};
 use canvas::Canvas;
 use pixel::{Pixel, GraphCoord, Color};
 
 /// The Axis2D represents a 2D axis for a line or bar graph
 /// This should be constructed for you automatically by a Graph2D
-pub struct Axis2D<'a, T: 'a> {
+pub struct Axis2D<'a, 'b, T: 'a> {
     /// max_x is the largest value that will be plotted on the x axis
     max_x: f64,
     /// max_y is the largest value that will be plotted on the y axis
@@ -19,18 +19,14 @@ pub struct Axis2D<'a, T: 'a> {
     /// The height of the canvas that Axis2D should be plotted on
     height: f64,
 
-    /// vertical_border should be a number between 0 and 1 that represents
-    /// the percentage of the vertical space available that should be used as 
-    /// a margin between the canvas and the top and bottom of the y-axis
-    vertical_border: f64,
-    horizontal_border: f64,
+    options: AxisOptions<'b>,
 
     /// The canvas that the axis should be plotted on
     canvas: &'a mut T
 }
 
-impl<'c, T: Canvas> Axis2D<'c, T> {
-    pub fn new(max_x: f64, max_y: f64, min_x: f64, min_y: f64, canvas: &'c mut T) -> Axis2D<'c, T> {
+impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
+    pub fn new(max_x: f64, max_y: f64, min_x: f64, min_y: f64, opts: AxisOptions<'b>, canvas: &'a mut T) -> Axis2D<'a, 'b, T> {
         let (w, h) = canvas.get_size();
 
         Axis2D {
@@ -43,19 +39,10 @@ impl<'c, T: Canvas> Axis2D<'c, T> {
             width: w,
             height: h,
 
-            vertical_border: 0.1,
-            horizontal_border: 0.1,
+            options: opts,
 
             canvas: canvas,
         }
-    }
-
-    pub fn set_horizontal_border(&mut self, horizontal_border: f64) {
-        self.horizontal_border = horizontal_border;
-    }
-
-    pub fn set_vertical_border(&mut self, vertical_border: f64) {
-        self.vertical_border = vertical_border;
     }
 
     pub fn show(&mut self) {
@@ -72,16 +59,18 @@ impl<'c, T: Canvas> Axis2D<'c, T> {
     fn graph_coord_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
         let gp = gp.into();
         let origin = self.canvas.get_origin();
+        let horizontal_border = self.options.horizontal_border;
+        let vertical_border = self.options.vertical_border;
 
         let x_range = self.max_x - self.min_x;
         let y_range = self.max_y - self.min_y;
 
-        let x_origin_pixel = origin.x + (self.width * self.horizontal_border);
-        let actual_width_pixels = self.width - (2.0 * self.width * self.horizontal_border);
+        let x_origin_pixel = origin.x + (self.width * horizontal_border);
+        let actual_width_pixels = self.width - (2.0 * self.width * horizontal_border);
         let new_x = x_origin_pixel + (actual_width_pixels * ((self.min_x.abs() + gp.x) / x_range));
         
-        let y_origin_pixel = origin.y + (self.height * self.vertical_border);
-        let actual_height_pixels = self.height - (2.0 * self.height * self.vertical_border);
+        let y_origin_pixel = origin.y + (self.height * vertical_border);
+        let actual_height_pixels = self.height - (2.0 * self.height * vertical_border);
         let new_y = y_origin_pixel + (actual_height_pixels * ((self.min_y.abs() + gp.y) / y_range));
 
         Pixel::new(new_x, new_y)
@@ -109,7 +98,8 @@ impl<'c, T: Canvas> Axis2D<'c, T> {
         self.canvas.draw_line((x, y-5.0), (x, y+5.0));
     }
 
-    pub fn plot_axises(&mut self, tick_count: f64) {
+    pub fn plot_axises(&mut self) {
+        let tick_count = self.options.tick_count;
         let max_x = self.max_x; let min_x = self.min_x;
         let max_y = self.max_y; let min_y = self.min_y;
 
@@ -141,6 +131,8 @@ impl<'c, T: Canvas> Axis2D<'c, T> {
 
         self.plot_line((min_x, 0.0), (max_x, 0.0));
         self.plot_line((0.0, min_y), (0.0, max_y));
+        self.write_xlabel(self.options.x_label);
+        self.write_ylabel(self.options.y_label);
         self.canvas.show();
     }
 
@@ -160,13 +152,13 @@ impl<'c, T: Canvas> Axis2D<'c, T> {
         (ul, ll, step_size)
     }
 
-    pub fn write_xlabel(&mut self, x_label: &str) {
+    fn write_xlabel(&mut self, x_label: &str) {
         let half_way = self.max_x / 2.0;
         let pix = self.graph_coord_to_pixel((half_way, 0.0));
         self.canvas.write_text(x_label, (pix.x, pix.y - 25.0));
     }
 
-    pub fn write_ylabel(&mut self, y_label: &str) {
+    fn write_ylabel(&mut self, y_label: &str) {
         let half_way = self.max_y / 2.0;
         let pix = self.graph_coord_to_pixel((0.0, half_way));
         self.canvas.write_text(y_label, (pix.x - 55.0, pix.y));

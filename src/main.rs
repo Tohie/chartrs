@@ -3,12 +3,12 @@ extern crate chartrs;
 
 use chartrs::canvas::with_sdl2_context;
 use chartrs::pixel::Color;
-use chartrs::{Graph2D, PlotOptions, DataSetOptions, PlotStyle, PointStyle, DataSet, Graph};
+use chartrs::{Graph2D, AxisOptions, DataSetOptions, PlotStyle, PointStyle, DataSet, Graph};
 
 fn main() {
     let font_size = 12;
     with_sdl2_context(800, 600, font_size, |ctx| {
-        let plot_options = PlotOptions::new()
+        let plot_options = AxisOptions::new()
             .tick_count(8.0)
             .x_label("t (s)")
             .y_label("A (V)");

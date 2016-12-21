@@ -25,20 +25,20 @@ pub enum PointStyle {
     // could have circle, etc.
 }
 
-/// `PlotOptions` contains options that are specific to the graph
+/// `AxisOptions` contains options that are specific to the graph
 /// and not a particular series such as any labels, borders or grids
 /// 
 /// # Example
 /// 
 /// ```
-/// let opts = PlotOptions::new()
+/// let opts = AxisOptions::new()
 ///     .tick_count(8)
 ///     .x_label("this is my x label")
 ///     .title("my graph")
 /// ```
 ///
 #[derive(Clone, PartialEq)]
-pub struct PlotOptions<'a> {
+pub struct AxisOptions<'a> {
     /// The amount of ticks to display on the x and y axis
     pub tick_count: f64,
 
@@ -61,11 +61,11 @@ pub struct PlotOptions<'a> {
     pub vertical_border: f64,
 }
 
-impl <'a> PlotOptions<'a> {
-    /// Creates a new PlotOptions using the default values specified
+impl <'a> AxisOptions<'a> {
+    /// Creates a new AxisOptions using the default values specified
     /// by the implementation of Default by this struct
-    pub fn new() -> PlotOptions<'a> {
-        PlotOptions::default()
+    pub fn new() -> AxisOptions<'a> {
+        AxisOptions::default()
     }
 
     pub fn tick_count(mut self, tick_count: f64) -> Self {
@@ -99,9 +99,9 @@ impl <'a> PlotOptions<'a> {
     }
 }
 
-impl <'a> Default for PlotOptions<'a> {
-    fn default() -> PlotOptions<'a> {
-        PlotOptions { 
+impl <'a> Default for AxisOptions<'a> {
+    fn default() -> AxisOptions<'a> {
+        AxisOptions { 
             tick_count: 10.0,
             x_label: "",
             y_label: "",
