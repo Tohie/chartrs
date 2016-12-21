@@ -59,7 +59,9 @@ impl <'a> Canvas for SDL2Canvas<'a> {
 
         let TextureQuery { width, height, .. } = texture.query();
         let pix = self.convert_to_bottom_left_origin(bottom_left_corner);
-        let r = Rect::new(pix.x as i32, pix.y as i32, width, height);
+        let centre_x = pix.x - (width as f64 / 2.0);
+        let centre_y = pix.y - (height as f64 / 2.0);
+        let r = Rect::new(centre_x as i32, centre_y as i32, width, height);
         self.renderer.copy(&texture, None, Some(r)).unwrap();
     }
     

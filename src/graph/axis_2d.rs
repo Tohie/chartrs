@@ -94,8 +94,10 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         let x = pix.x;
         let y = pix.y;
 
-        self.canvas.draw_line((x-5.0, y), (x+5.0, y));
-        self.canvas.draw_line((x, y-5.0), (x, y+5.0));
+        let offset = self.width * 0.005;
+        
+        self.canvas.draw_line((x-offset, y), (x+offset, y));
+        self.canvas.draw_line((x, y-offset), (x, y+offset));
     }
 
     pub fn plot_axises(&mut self) {
@@ -109,9 +111,11 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         let mut x = min_x;
         while x <= max_x {
             let pix = self.graph_coord_to_pixel((x, 0.0));
-            self.canvas.draw_line((pix.x, pix.y), (pix.x, pix.y-5.0));
+            let tick_size = self.height * self.options.tick_size;
+            self.canvas.draw_line((pix.x, pix.y), (pix.x, pix.y-tick_size));
 
-            self.canvas.write_num(x, (pix.x - 3.0, pix.y - 10.0));
+            let number_offset = self.height * self.options.number_offset;
+            self.canvas.write_num(x, (pix.x, pix.y - number_offset));
 
             x += tick_x;
         }
@@ -122,9 +126,11 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         let mut y = min_y;
         while y <= max_y {
             let pix = self.graph_coord_to_pixel((0.0, y));
-            self.canvas.draw_line((pix.x, pix.y), (pix.x-5.0, pix.y));        
+            let tick_size = self.width * 0.01;
+            self.canvas.draw_line((pix.x, pix.y), (pix.x-tick_size, pix.y));        
 
-            self.canvas.write_num(y, (pix.x - 20.0, pix.y + 5.0));
+            let number_offset = self.height * self.options.number_offset;
+            self.canvas.write_num(y, (pix.x - number_offset, pix.y));
             
             y += tick_y;
         }
@@ -152,15 +158,20 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         (ul, ll, step_size)
     }
 
+    fn write_label<P: Into<Pixel>>(&mut self, label: &str, loc: P) {
+        let pix = self.graph_coord_to_pixel(loc);
+        let x_offset = self.width * self.options.label_offset;
+        let y_offset = self.height * self.options.label_offset;
+        self.canvas.write_text(label, (pix.x - x_offset, pix.y - y_offset));
+    }
+
     fn write_xlabel(&mut self, x_label: &str) {
-        let half_way = self.max_x / 2.0;
-        let pix = self.graph_coord_to_pixel((half_way, 0.0));
-        self.canvas.write_text(x_label, (pix.x, pix.y - 25.0));
+        let half_way = self.max_x  / 2.0;
+        self.write_label(x_label, (half_way, 0.0));
     }
 
     fn write_ylabel(&mut self, y_label: &str) {
         let half_way = self.max_y / 2.0;
-        let pix = self.graph_coord_to_pixel((0.0, half_way));
-        self.canvas.write_text(y_label, (pix.x - 55.0, pix.y));
+        self.write_label(y_label, (0.0, half_way));
     }
 }

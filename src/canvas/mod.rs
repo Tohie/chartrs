@@ -21,9 +21,9 @@ pub trait Canvas {
     fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P);
     
     /// Should write text `t` with the width and height defined by the font type
-    /// and the `bottom_left_corner` should be where the bottom left corner 
+    /// and the `centre` should be where the centre of the text drawn 
     /// is in pixels 
-    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left_corner: P);
+    fn write_text<P: Into<Pixel>>(&mut self, t: &str, centre: P);
     /// Convenience method to save converting strings to num for axis labels
     fn write_num<P: Into<Pixel>>(&mut self, t: f64, p: P) {
         let t = format!("{}", t);
