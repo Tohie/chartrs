@@ -1,6 +1,6 @@
 use graph::data_set::DataSet;
 use graph::{Graph, PlotStyle, AxisOptions, DataSetOptions};
-use graph::axis_2d::Axis2D;
+use graph::axis::Axis2D;
 use pixel::{GraphCoord, Color};
 use canvas::Canvas;
 use utils;
@@ -25,7 +25,7 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
 
         let min_coord = utils::get_min_coord(&min_coords);
 
-        let axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, axis_options, canvas);
+        let mut axis = Axis2D::new(max_coord.x, max_coord.y, min_coord.x, min_coord.y, axis_options, canvas);
         Graph2D { data_sets: data_sets, axis: axis, }
     }
 
@@ -90,7 +90,7 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
 impl <'a, 'b, 'c, 'd, T: Canvas> Graph for Graph2D<'a, 'b, 'c, 'd, T> {
     fn plot(&mut self) {
         self.axis.set_color(Color(0, 0, 0));
-        self.axis.plot_axises();
+        self.axis.plot_axises();  
 
         for ds in self.data_sets {
             self.plot_data_set(ds);

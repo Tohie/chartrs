@@ -1,6 +1,6 @@
 mod graph_2d;
 mod data_set;
-mod axis_2d;
+mod axis;
 
 pub use self::data_set::DataSet;
 pub use self::graph_2d::Graph2D;

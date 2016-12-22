@@ -1,22 +1,12 @@
 use graph::{PointStyle, AxisOptions};
+use graph::axis::AxisBounds;
 use canvas::Canvas;
 use pixel::{Pixel, GraphCoord, Color};
 
 /// The Axis2D represents a 2D axis for a line or bar graph
 /// This should be constructed for you automatically by a Graph2D
 pub struct Axis2D<'a, 'b, T: 'a> {
-    /// max_x is the largest value that will be plotted on the x axis
-    max_x: f64,
-    /// max_y is the largest value that will be plotted on the y axis
-    max_y: f64,
-
-    min_x: f64,
-    min_y: f64,
-
-    /// The width of the canvas that Axis2D should be plotted on
-    width: f64,
-    /// The height of the canvas that Axis2D should be plotted on
-    height: f64,
+    bounds: AxisBounds,
 
     /// The amount in pixels each tick on the axis should be seperated by
     tick_amount_x: f64,
@@ -32,18 +22,16 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
     pub fn new(max_x: f64, max_y: f64, min_x: f64, min_y: f64, opts: AxisOptions<'b>, canvas: &'a mut T) -> Axis2D<'a, 'b, T> {
         let (w, h) = canvas.get_size();
         
-        let (max_x, min_x, tick_x) = calculate_pretty_axis_values(max_x, min_x, opts.tick_count);
-        let (max_y, min_y, tick_y) = calculate_pretty_axis_values(max_y, min_y, opts.tick_count);
+        let (max_x, min_x, tick_x) = pretty_axis_values(max_x, min_x, opts.tick_count);
+        let (max_y, min_y, tick_y) = pretty_axis_values(max_y, min_y, opts.tick_count);
         
+        let bounds = AxisBounds::new(
+            (min_x, min_y), (max_x, max_y), 
+            w, h,
+            opts.horizontal_border, opts.vertical_border);
+
         Axis2D {
-            max_x: max_x,
-            max_y: max_y,
-
-            min_x: min_x,
-            min_y: min_y,
-
-            width: w,
-            height: h,
+            bounds: bounds,
 
             tick_amount_x: tick_x,
             tick_amount_y: tick_y,
@@ -62,32 +50,10 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         self.canvas.set_color(c)
     }
 
-    /// This functions takes a GraphCoord and returns
-    /// the pixel where it should be drawn on screen i.e. (2, 2)
-    /// might be at the pixel (100, 100) on a particular canvas 
-    fn graph_coord_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
-        let gp = gp.into();
-        let origin = self.canvas.get_origin();
-        let horizontal_border = self.options.horizontal_border;
-        let vertical_border = self.options.vertical_border;
-
-        let x_range = self.max_x - self.min_x;
-        let y_range = self.max_y - self.min_y;
-
-        let x_origin_pixel = origin.x + (self.width * horizontal_border);
-        let actual_width_pixels = self.width - (2.0 * self.width * horizontal_border);
-        let new_x = x_origin_pixel + (actual_width_pixels * ((self.min_x.abs() + gp.x) / x_range));
-        
-        let y_origin_pixel = origin.y + (self.height * vertical_border);
-        let actual_height_pixels = self.height - (2.0 * self.height * vertical_border);
-        let new_y = y_origin_pixel + (actual_height_pixels * ((self.min_y.abs() + gp.y) / y_range));
-
-        Pixel::new(new_x, new_y)
-    }
-
     pub fn plot_line<G: Into<GraphCoord>>(&mut self, p1: G, p2: G) {
-        let p1 = self.graph_coord_to_pixel(p1.into());
-        let p2 = self.graph_coord_to_pixel(p2.into());
+        let p1 = self.bounds.convert_to_pixel(p1.into());
+        let p2 = self.bounds.convert_to_pixel(p2.into());
+
         self.canvas.draw_line(p1, p2);
     }
 
@@ -99,11 +65,11 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
     }
 
     fn plot_cross(&mut self, point: GraphCoord) {
-        let pix = self.graph_coord_to_pixel(point);
+        let pix = self.bounds.convert_to_pixel(point);
         let x = pix.x;
         let y = pix.y;
 
-        let offset = self.width * 0.005;
+        let offset = self.bounds.width * 0.005;
         
         self.canvas.draw_line((x-offset, y), (x+offset, y));
         self.canvas.draw_line((x, y-offset), (x, y+offset));
@@ -112,9 +78,7 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
     pub fn plot_axises(&mut self) {
         // These need to be here, as self can't be borrowed immutably
         // during the mutable borrow of draw_axis();
-        let max_x = self.max_x; let min_x = self.min_x;
-        let max_y = self.max_y; let min_y = self.min_y;
-        let height = self.height; let width = self.width;
+        let AxisBounds { max_x, max_y, min_x, min_y, height, width, .. } = self.bounds;
         let tick_x = self.tick_amount_x; let tick_y = self.tick_amount_y;
 
         let is_x = true; let is_y = false;
@@ -135,7 +99,7 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
         let is_y = if is_y { 1.0 } else { 0.0 };
         let mut i = min_i;
         while i <= max_i {
-            let pix = self.graph_coord_to_pixel((i*is_x, i*is_y));
+            let pix = self.bounds.convert_to_pixel((i*is_x, i*is_y));
             
             let tick_size = space * self.options.tick_size;
             self.canvas.draw_line((pix.x, pix.y), (pix.x - (tick_size*is_y), pix.y - (tick_size*is_x)));
@@ -148,25 +112,25 @@ impl<'a, 'b, T: Canvas> Axis2D<'a, 'b, T> {
     }
 
     fn write_label<P: Into<Pixel>>(&mut self, label: &str, loc: P) {
-        let pix = self.graph_coord_to_pixel(loc);
-        let x_offset = self.width * self.options.label_offset;
-        let y_offset = self.height * self.options.label_offset;
+        let pix = self.bounds.convert_to_pixel(loc);
+        let x_offset = self.bounds.width * self.options.label_offset;
+        let y_offset = self.bounds.height * self.options.label_offset;
         self.canvas.write_text(label, (pix.x - x_offset, pix.y - y_offset));
     }
 
     fn write_xlabel(&mut self, x_label: &str) {
-        let half_way = self.max_x  / 2.0;
+        let half_way = self.bounds.max_x  / 2.0;
         self.write_label(x_label, (half_way, 0.0));
     }
 
     fn write_ylabel(&mut self, y_label: &str) {
-        let half_way = self.max_y / 2.0;
+        let half_way = self.bounds.max_y / 2.0;
         self.write_label(y_label, (0.0, half_way));
     }
 }
 
 // returns the upper and lower limits and the increment size
-fn calculate_pretty_axis_values(max: f64, min: f64, tick_count: f64) -> (f64, f64, f64) {
+fn pretty_axis_values(max: f64, min: f64, tick_count: f64) -> (f64, f64, f64) {
     let range = max - min;
     let temp_step = range/(tick_count - 1.0);
 
