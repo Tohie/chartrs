@@ -1,11 +1,11 @@
-mod axis_2d;
+mod graph_canvas;
 
-pub use self::axis_2d::Axis2D;
+pub use self::graph_canvas::GraphCanvas;
 
 use pixel::{GraphCoord, Pixel};
 
 #[derive(Clone, Copy, PartialEq)]
-pub struct AxisBounds {
+pub struct GraphBounds {
     max_x: f64,
     max_y: f64,
 
@@ -19,15 +19,11 @@ pub struct AxisBounds {
     vertical_border: f64,
 }
 
-impl AxisBounds {
-    fn new<G: Into<GraphCoord>>(min: G, max: G, 
-         width: f64, height: f64,
-         horizontal_border: f64, vertical_border: f64) 
-        -> AxisBounds {
-        
+impl GraphBounds {
+    pub fn new<G: Into<GraphCoord>>(min: G, max: G, width: f64, height: f64) -> GraphBounds {
         let min = min.into();
         let max = max.into();
-        AxisBounds {
+        GraphBounds {
             max_x: max.x,
             max_y: max.y,
 
@@ -37,12 +33,12 @@ impl AxisBounds {
             height: height,
             width: width,
 
-            horizontal_border: horizontal_border,
-            vertical_border: vertical_border,
+            horizontal_border: 0.1,
+            vertical_border: 0.1,
         }
     }
 
-    fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
+    pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
         let gp = gp.into();
         let origin = Pixel::new(0.0, 0.0);
         let horizontal_border = self.horizontal_border;

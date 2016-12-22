@@ -17,3 +17,20 @@ fn find_x_and_y_by_predicate<F>(coords: &[GraphCoord], f: F) -> GraphCoord
         GraphCoord::new(x, y)
     })
 }
+
+
+// returns the upper and lower limits and the increment size
+pub fn pretty_axis_values(max: f64, min: f64, tick_count: f64) -> (f64, f64, f64) {
+    let range = max - min;
+    let temp_step = range/(tick_count - 1.0);
+
+    let mag = (temp_step.log10() - 1.0).floor();
+    let ten = 10.0_f64;
+    let mag_pow = ten.powf(mag);
+    
+    let step_size = (temp_step / mag_pow).ceil() * mag_pow;
+    let ll = step_size * (min/step_size).floor();
+    let ul = step_size * (max/step_size).ceil();
+
+    (ul, ll, step_size)
+}

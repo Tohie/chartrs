@@ -1,9 +1,11 @@
 mod graph_2d;
 mod data_set;
-mod axis;
+mod canvas;
+pub mod plottable;
 
 pub use self::data_set::DataSet;
 pub use self::graph_2d::Graph2D;
+pub use self::plottable::Plottable;
 
 use pixel::Color;
 
@@ -33,7 +35,7 @@ pub enum PointStyle {
 /// ```
 /// let opts = AxisOptions::new()
 ///     .tick_count(8)
-///     .x_label("this is my x label")
+///     .label("this is my x label")
 ///     .title("my graph")
 /// ```
 ///
@@ -54,23 +56,10 @@ pub struct AxisOptions<'a> {
     /// on an axis that will be displayed below the tick
     pub number_offset: f64,
 
-    /// A label that will be displayed on the x axis
-    /// it will be placed halfway between the maximum x
-    /// value and the origin just below the x axis
-    pub x_label: &'a str,
-
-    pub y_label: &'a str,
-    
-    /// The title of the graph, will be drawn at the top of the positive x and y 
-    /// quadrant
-    pub title: &'a str,
-
-    /// `horizontal_border` is the percentage of the horizontal space
-    /// that should be used a border each side
-    /// i.e. if `horizontal_border = 0.1` then there will be a 10% border of
-    /// whitespace on each side of the canvas 
-    pub horizontal_border: f64,
-    pub vertical_border: f64,
+    /// A label that will be displayed on the axis
+    /// it will be placed halfway between the maximum
+    /// value and the origin
+    pub label: &'a str,
 }
 
 impl <'a> AxisOptions<'a> {
@@ -85,28 +74,8 @@ impl <'a> AxisOptions<'a> {
         self
     }
 
-    pub fn horizontal_border(mut self, horizontal_border: f64) -> Self {
-        self.horizontal_border = horizontal_border;
-        self
-    }
-
-    pub fn vertical_border(mut self, vertical_border: f64) -> Self {
-        self.vertical_border = vertical_border;
-        self
-    }
-
-    pub fn x_label(mut self, x_label: &'a str) -> Self {
-        self.x_label = x_label;
-        self
-    }
-
-    pub fn y_label(mut self, y_label: &'a str) -> Self {
-        self.y_label = y_label;
-        self
-    }
-
-    pub fn title(mut self, title: &'a str) -> Self {
-        self.title = title;
+    pub fn label(mut self, label: &'a str) -> Self {
+        self.label = label;
         self
     }
 
@@ -133,11 +102,7 @@ impl <'a> Default for AxisOptions<'a> {
             tick_size: 0.01,
             number_offset: 0.03,
             label_offset: 0.04,
-            x_label: "",
-            y_label: "",
-            title: "",
-            horizontal_border: 0.1,
-            vertical_border: 0.1,
+            label: "",
         }
     }
 }

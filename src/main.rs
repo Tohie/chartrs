@@ -8,10 +8,8 @@ use chartrs::{Graph2D, AxisOptions, DataSetOptions, PlotStyle, PointStyle, DataS
 fn main() {
     let font_size = 12;
     with_sdl2_context(800, 600, font_size, |ctx| {
-        let plot_options = AxisOptions::new()
-            .tick_count(8.0)
-            .x_label("t (s)")
-            .y_label("A (V)");
+        let x_options = AxisOptions::new().label("t (s)");
+        let y_options = AxisOptions::new().label("A (V)");
 
         let line_options = DataSetOptions::new()
             .plot_style(PlotStyle::Line)
@@ -22,14 +20,20 @@ fn main() {
             .point_style(PointStyle::Cross)
             .random_color(true);
 
+        let bar_options = DataSetOptions::new()
+            .plot_style(PlotStyle::Bar)
+            .color(Color(0, 0, 255));
+
         let x1 = (-400..401).map(|x| (x as f64)/10.0).collect::<Vec<f64>>();
         let x2 = (-9..10).map(|x| x as f64).collect::<Vec<f64>>(); 
+        let x3 = x2.clone();
 
         let ds1 = DataSet::from_fn(x1, &line_options, |x| x * -2.0);
         let ds2 = DataSet::from_fn(x2, &scatter_options, |x| x.powi(2));
-        
-        let data_sets = &[&ds1, &ds2];
-        let mut g1 = Graph2D::new(ctx, data_sets, plot_options);
+        let ds3 = DataSet::from_fn(x3, &bar_options, |x| x + 2.0 );
+
+        let data_sets = &[&ds1, &ds2, &ds3];
+        let mut g1 = Graph2D::new(ctx, data_sets, &x_options, &y_options);
 
         g1.plot();
     });

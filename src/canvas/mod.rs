@@ -26,7 +26,7 @@ pub trait Canvas {
     fn write_text<P: Into<Pixel>>(&mut self, t: &str, centre: P);
     /// Convenience method to save converting strings to num for axis labels
     fn write_num<P: Into<Pixel>>(&mut self, t: f64, p: P) {
-        let t = format!("{}", t);
+        let t = format!("{:.1}", t);
         self.write_text(&t, p);
     }
 
