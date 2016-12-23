@@ -3,7 +3,7 @@ extern crate chartrs;
 
 use chartrs::canvas::with_sdl2_context;
 use chartrs::pixel::Color;
-use chartrs::{Graph2D, AxisOptions, DataSetOptions, PlotStyle, PointStyle, DataSet, Graph};
+use chartrs::{Graph2D, AxisOptions, DataSetOptions, PlotStyle, PointStyle, DataSet};
 
 fn main() {
     let font_size = 12;

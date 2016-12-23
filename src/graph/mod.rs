@@ -160,7 +160,3 @@ impl <'a> Default for DataSetOptions<'a> {
         }
     }
 }
-
-pub trait Graph {
-    fn plot(&mut self);
-}
