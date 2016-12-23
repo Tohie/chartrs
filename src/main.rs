@@ -22,13 +22,8 @@ fn main() {
             .point_style(PointStyle::Cross)
             .random_color(true);
 
-        let bar_options = DataSetOptions::new()
-            .plot_style(PlotStyle::Bar)
-            .color(Color(0, 0, 255));
-
         let x1 = (-400..401).map(|x| (x as f64)/10.0).collect::<Vec<f64>>();
         let x2 = (-9..10).map(|x| x as f64).collect::<Vec<f64>>(); 
-        let x3 = x2.clone();
 
         let ds1 = DataSet::from_fn(x1, &line_options, |x| x * -2.0);
         let ds2 = DataSet::from_fn(x2, &scatter_options, |x| x.powi(2));

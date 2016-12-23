@@ -1,13 +1,11 @@
 use data_set::DataSet;
 use options::{PlotStyle, AxisOptions};
 use plottable::Plottable;
-use plottable::primitives::{Point, Bar};
+use plottable::primitives::Bar;
 use plottable::graphs::{LineSeries, ScatterSeries};
-use plottable::{Axis, AxisKind};
 use pixel::{GraphCoord, Color};
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
-use utils;
 
 /// A `Graph2D` is a graph with a standard 2d canvas, i.e. a bar, line or a scatter graph
 pub struct Graph2D<'a, 'c, T: 'c> {
