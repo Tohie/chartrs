@@ -20,16 +20,6 @@ pub enum PointStyle {
 
 /// `AxisOptions` contains options that are specific to the graph
 /// and not a particular series such as any labels, borders or grids
-/// 
-/// # Example
-/// 
-/// ```
-/// let opts = AxisOptions::new()
-///     .tick_count(8)
-///     .label("this is my x label")
-///     .title("my graph")
-/// ```
-///
 #[derive(Clone, PartialEq)]
 pub struct AxisOptions<'a> {
     /// The amount of ticks to display on the x and y axis

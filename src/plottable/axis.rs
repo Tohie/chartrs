@@ -2,7 +2,8 @@ use options::AxisOptions;
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
 use plottable::Plottable;
-use pixel::Color;
+use pixel::{Color, Pixel};
+use utils;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum AxisKind {
@@ -11,62 +12,65 @@ pub enum AxisKind {
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Axis<'a> {
-    kind: AxisKind,
-    tick_amount: f64,
-    max: f64,
-    min: f64,
-    space: f64,
-
-    opts: &'a AxisOptions<'a>,
+    x_opts: &'a AxisOptions<'a>,
+    y_opts: &'a AxisOptions<'a>,
 }
 
 impl<'a> Axis<'a> {
-    pub fn new(kind: AxisKind, tick_amount: f64, max: f64, min: f64, space: f64, opts: &'a AxisOptions) -> Axis<'a> {
-        Axis { 
-            kind: kind,
-            tick_amount: tick_amount,
-            max: max,
-            min: min,
-            space: space,
-            opts: opts,
+    pub fn new(x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
+        Axis {
+            x_opts: x_opts,
+            y_opts: y_opts,
         }
-    }
-
-    pub fn from_dimensions<'b>(kind: AxisKind, opts: &'a AxisOptions, dimensions: &'b GraphDimensions) -> Axis<'a> {
-        let GraphDimensions { max, min, tick_x, tick_y, height, width, .. } = *dimensions;
-        let (max, min, space, tick_amount) = match kind {
-            AxisKind::X => (max.x, min.x, width, tick_x),
-            AxisKind::Y => (max.y, min.y, height, tick_y),
-        };
-
-        Axis::new(kind, tick_amount, max, min, space, opts)
     }
 
     fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
-        let (is_x, is_y) = match self.kind {
-            AxisKind::X => (1.0, 0.0),
-            AxisKind::Y => (0.0, 1.0),
-        };
+        let (_, _, tick_x) = utils::pretty_axis_values(bounds.max.x, bounds.min.x, self.x_opts.tick_count);
+        let (_, _, tick_y) = utils::pretty_axis_values(bounds.max.y, bounds.min.y, self.y_opts.tick_count);
 
-        let min = bounds.convert_to_pixel((self.min * is_x, self.min * is_y));
-        let max = bounds.convert_to_pixel((self.max * is_x, self.max * is_y));
-        
-        canvas.draw_line(min, max);
+        let bottom_left = bounds.convert_to_pixel((bounds.min.x, bounds.min.y));
+        let top_left = bounds.convert_to_pixel((bounds.min.x, bounds.max.y));
+        let bottom_right = bounds.convert_to_pixel((bounds.max.x, bounds.min.y));
+        let top_right = bounds.convert_to_pixel((bounds.max.x, bounds.max.y));
 
-        let mut i = self.min;
-        while i <= self.max {
-            let pix = bounds.convert_to_pixel((i*is_x, i*is_y));
+        canvas.draw_line(bottom_left, bottom_right);
+        canvas.draw_line(bottom_left, top_left);
+        canvas.draw_line(top_left, top_right);
+        canvas.draw_line(bottom_right, top_right);
+
+        let mut x = bounds.min.x;
+        while x <= bounds.max.x {
+            let pix = bounds.convert_to_pixel((x, bounds.min.y));
             
-            let tick_size = self.space * self.opts.tick_size;
-            canvas.draw_line((pix.x, pix.y), (pix.x - (tick_size*is_y), pix.y - (tick_size*is_x)));
+            let tick_size = bounds.width * self.x_opts.tick_size;
+            canvas.draw_line(pix, Pixel::new(pix.x, pix.y - tick_size));
 
-            let number_offset = self.space * self.opts.number_offset;
-            canvas.write_num(i, (pix.x - (number_offset * is_y), pix.y - (number_offset * is_x)));
+            let number_offset = bounds.width * self.x_opts.number_offset;
+            canvas.write_num(x, (pix.x, pix.y - number_offset));
 
-            i += self.tick_amount;
+            let top = bounds.convert_to_pixel((x, bounds.max.y));
+            canvas.draw_line(pix, top);
+
+            x += tick_x;
+        }
+
+        let mut y = bounds.min.y;
+        while y <= bounds.max.y {
+            let pix = bounds.convert_to_pixel((bounds.min.x, y));
+            
+            let tick_size = bounds.height * self.y_opts.tick_size;
+            canvas.draw_line((pix.x, pix.y), (pix.x - tick_size, pix.y));
+
+            let number_offset = bounds.height * self.y_opts.number_offset;
+            canvas.write_num(y, (pix.x - number_offset, pix.y));
+
+            let right = bounds.convert_to_pixel((bounds.max.x, y));
+            canvas.draw_line(pix, right);
+
+            y += tick_y;
         }
     }
-
+/*
     fn write_label<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let (is_x, is_y) = match self.kind {
             AxisKind::X => (1.0, 0.0),
@@ -84,12 +88,13 @@ impl<'a> Axis<'a> {
 
         canvas.write_text(self.opts.label, (pix.x - x_offset, pix.y - y_offset));
     }
+*/
 }
 
 impl<'a> Plottable for Axis<'a> {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         canvas.set_color(Color(0, 0, 0));
         self.draw_axis(bounds, canvas);
-        self.write_label(bounds, canvas);
+        // self.write_label(bounds, canvas);
     }
 }

@@ -3,6 +3,7 @@ use options::{PlotStyle, AxisOptions};
 use plottable::Plottable;
 use plottable::primitives::Bar;
 use plottable::graphs::{LineSeries, ScatterSeries};
+use plottable::axis::Axis;
 use pixel::{GraphCoord, Color};
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
@@ -17,7 +18,7 @@ pub struct Graph2D<'a, 'c, T: 'c> {
 impl <'a, 'c, T: Canvas> Graph2D<'a, 'c, T> {
     pub fn new(canvas: &'c mut T, data_sets: Vec<&'a DataSet<'a>>) -> Self {
         let (width, height) = canvas.get_size();
-        let mut dimensions = GraphDimensions::new((0.0, 0.0), (0.0, 0.0), width, height);
+        let mut dimensions = GraphDimensions::new(width, height);
 
         for ds in data_sets.iter() {
             dimensions.adjust_for(ds);
@@ -67,10 +68,10 @@ impl <'a, 'c, T: Canvas> Graph2D<'a, 'c, T> {
         self.canvas.set_color(Color(255, 255, 255));
         self.canvas.clear();
         
-        let (x_axis, y_axis) = self.dimensions.make_axises(x_opts, y_opts);
+        self.dimensions.adjust_for_axis(x_opts.tick_count, y_opts.tick_count);
+        let axis = Axis::new(x_opts, y_opts);
             
-        self.plot(&x_axis);
-        self.plot(&y_axis);
+        self.plot(&axis);
 
         self.canvas.set_color(Color(0, 0, 0));
         

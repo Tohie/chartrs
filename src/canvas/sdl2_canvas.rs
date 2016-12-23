@@ -83,14 +83,6 @@ impl <'a> Canvas for SDL2Canvas<'a> {
 /// It will construct a window with given width and height
 /// then pass an `SDL2Canvas` to the function given which allows a graph to be
 /// drawn, it will then loop until the window is closed or esc is pressed
-/// 
-/// # Example
-///
-/// ```
-/// with_sdl2_context(600, 800, 12, |ctx| {
-///     // ctx is an SDL2Canvas which can be used to plot
-/// });
-/// ```
 pub fn with_sdl2_context<F>(w: u32, h: u32, font_size: u16, f: F)
     where F: Fn(&mut SDL2Canvas) {
 
