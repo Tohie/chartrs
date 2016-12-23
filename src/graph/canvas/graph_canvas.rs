@@ -7,7 +7,6 @@ use pixel::{Pixel, GraphCoord, Color};
 pub struct GraphCanvas<'a, T: 'a> {
     bounds: GraphBounds,
 
-    /// The canvas that the axis should be plotted on
     canvas: &'a mut T
 }
 

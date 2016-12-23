@@ -35,11 +35,11 @@ impl Plottable for Point {
     }
 }
 
-pub struct Bar(pub GraphCoord, pub f64, pub f64);
+pub struct Bar(pub GraphCoord);
 
 impl Plottable for Bar {
     fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
-    
+        let pix = bounds.convert_to_pixel(self.0);
     }
 }
 

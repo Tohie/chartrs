@@ -1,6 +1,7 @@
 use graph::data_set::DataSet;
-use graph::{Graph, PlotStyle, DataSetOptions, AxisOptions};
+use graph::{PlotStyle, DataSetOptions, AxisOptions};
 use graph::plottable::primitives::{Line, Point, Bar};
+use graph::plottable::graphs::LineSeries;
 use graph::plottable::{Plottable, Axis, AxisKind};
 use graph::canvas::{GraphCanvas, GraphBounds};
 use pixel::{GraphCoord, Color};
@@ -52,17 +53,14 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
     }
 
     fn plot_line_graph(&mut self, ds: &'a DataSet<'a>) {
-        for pair in ds.data_points.windows(2) {
-            self.update_color(ds);
-            self.canvas.plot(&Line(pair[0], pair[1]));
-        }
+        self.canvas.plot(&LineSeries(ds))
     }
 
     fn plot_point_as_bar(&mut self, gp: GraphCoord) {
         let x = gp.x;
         let y = gp.y;
 
-        self.canvas.plot(&Bar(GraphCoord::new(x - 0.5, 0.0), 1, y));
+        self.canvas.plot(&Bar(GraphCoord::new(x, y)));
     }
 
     fn plot_bar_graph(&mut self, ds: &'a DataSet<'a>) {
@@ -71,7 +69,6 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
             self.plot_point_as_bar(point);
         }
     }
-
 
     fn plot_scatter_graph(&mut self, ds: &'a DataSet<'a>) {
         for &point in ds.data_points.iter() {
@@ -87,16 +84,14 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
     pub fn plot_data_set(&mut self, ds: &'a DataSet) {
         match ds.options.plot_style {
             PlotStyle::Line => self.plot_line_graph(ds),
-            PlotStyle::Bar => unimplemented!(),
+            PlotStyle::Bar => self.plot_bar_graph(ds),
             PlotStyle::Scatter => self.plot_scatter_graph(ds),
         }
 
         self.canvas.show();
     }
-}
 
-impl <'a, 'b, 'c, 'd, T: Canvas> Graph for Graph2D<'a, 'b, 'c, 'd, T> {
-    fn plot(&mut self) {
+    pub fn plot(&mut self) {
         {
             let ref x_axis = self.x_axis;
             let ref y_axis = self.y_axis;
@@ -107,8 +102,6 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph for Graph2D<'a, 'b, 'c, 'd, T> {
 
         self.canvas.set_color(Color(0, 0, 0));
         
-        
-
         for ds in self.data_sets {
             self.plot_data_set(ds);
         } 
