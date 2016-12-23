@@ -1,5 +1,5 @@
 use options::AxisOptions;
-use graph_bounds::GraphBounds;
+use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
 use plottable::Plottable;
 use pixel::Color;
@@ -32,7 +32,17 @@ impl<'a> Axis<'a> {
         }
     }
 
-    fn draw_axis<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    pub fn from_dimensions<'b>(kind: AxisKind, opts: &'a AxisOptions, dimensions: &'b GraphDimensions) -> Axis<'a> {
+        let GraphDimensions { max, min, tick_x, tick_y, height, width, .. } = *dimensions;
+        let (max, min, space, tick_amount) = match kind {
+            AxisKind::X => (max.x, min.x, width, tick_x),
+            AxisKind::Y => (max.y, min.y, height, tick_y),
+        };
+
+        Axis::new(kind, tick_amount, max, min, space, opts)
+    }
+
+    fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let (is_x, is_y) = match self.kind {
             AxisKind::X => (1.0, 0.0),
             AxisKind::Y => (0.0, 1.0),
@@ -57,7 +67,7 @@ impl<'a> Axis<'a> {
         }
     }
 
-    fn write_label<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn write_label<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let (is_x, is_y) = match self.kind {
             AxisKind::X => (1.0, 0.0),
             AxisKind::Y => (0.0, 1.0),
@@ -77,7 +87,7 @@ impl<'a> Axis<'a> {
 }
 
 impl<'a> Plottable for Axis<'a> {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         canvas.set_color(Color(0, 0, 0));
         self.draw_axis(bounds, canvas);
         self.write_label(bounds, canvas);

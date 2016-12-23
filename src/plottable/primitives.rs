@@ -1,13 +1,13 @@
 use canvas::Canvas;
 use pixel::GraphCoord;
 use options::PointStyle;
-use graph_bounds::GraphBounds;
+use graph_dimensions::GraphDimensions;
 use plottable::Plottable;
 
 pub struct Line(pub GraphCoord, pub GraphCoord);
 
 impl Plottable for Line {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let start = bounds.convert_to_pixel(self.0);
         let end = bounds.convert_to_pixel(self.1);
 
@@ -18,7 +18,7 @@ impl Plottable for Line {
 pub struct Point(pub GraphCoord, pub PointStyle);
 
 impl Point {
-    fn plot_cross<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot_cross<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let pix = bounds.convert_to_pixel(self.0);
 
         canvas.draw_line((pix.x + 2.5, pix.y), (pix.x-2.5, pix.y));
@@ -27,7 +27,7 @@ impl Point {
 }
 
 impl Plottable for Point {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         match self.1 {
             PointStyle::Cross => self.plot_cross(bounds, canvas),
             PointStyle::Nothing => {},
@@ -38,7 +38,7 @@ impl Plottable for Point {
 pub struct Bar(pub GraphCoord);
 
 impl Plottable for Bar {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let pix = bounds.convert_to_pixel(self.0);
     }
 }

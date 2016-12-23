@@ -36,11 +36,11 @@ pub mod options;
 mod graph_2d;
 mod data_set;
 pub mod plottable;
-mod graph_bounds;
+mod graph_dimensions;
 mod utils;
 
 pub use pixel::Pixel;
 pub use canvas::Canvas;
 pub use data_set::DataSet;
-pub use graph_bounds::GraphBounds;
+pub use graph_dimensions::GraphDimensions;
 pub use graph_2d::Graph2D;

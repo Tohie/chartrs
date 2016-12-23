@@ -5,6 +5,7 @@ use chartrs::canvas::with_sdl2_context;
 use chartrs::pixel::Color;
 use chartrs::options::{DataSetOptions, PlotStyle, PointStyle, AxisOptions};
 use chartrs::{Graph2D, DataSet};
+use std::{thread, time};
 
 fn main() {
     let font_size = 12;
@@ -31,11 +32,15 @@ fn main() {
 
         let ds1 = DataSet::from_fn(x1, &line_options, |x| x * -2.0);
         let ds2 = DataSet::from_fn(x2, &scatter_options, |x| x.powi(2));
-        let ds3 = DataSet::from_fn(x3, &bar_options, |x| x + 2.0 );
 
-        let data_sets = &[&ds1, &ds2, &ds3];
-        let mut g1 = Graph2D::new(ctx, data_sets, &x_options, &y_options);
+        let data_sets = vec!(&ds2);
+        let mut g1 = Graph2D::new(ctx, data_sets);
+        g1.show(&x_options, &y_options);
 
-        g1.show();
+        let two_seconds = time::Duration::from_secs(2);
+        thread::sleep(two_seconds);
+
+        g1.add_data_set(&ds1);
+        g1.show(&x_options, &y_options);
     });
 }

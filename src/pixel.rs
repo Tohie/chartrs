@@ -6,7 +6,7 @@ use rand::{Rand, Rng};
 
 /// The Pixel type, this represents an (x, y) location on the screen
 /// relative to the bottom left of the screen
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Pixel {
     pub x: f64,
     pub y: f64,

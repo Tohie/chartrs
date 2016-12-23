@@ -1,13 +1,13 @@
 use data_set::DataSet;
 use plottable::primitives::*;
 use plottable::{Plottable, Series};
-use graph_bounds::GraphBounds;
+use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
 
 pub struct LineSeries<'a>(pub &'a DataSet<'a>);
 
 impl <'a> Plottable for LineSeries<'a> {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let ds = self.0;
         canvas.set_color(ds.choose_color());
         
@@ -26,7 +26,7 @@ impl <'a> Series for LineSeries<'a> {
 pub struct ScatterSeries<'a>(pub &'a DataSet<'a>);
 
 impl <'a> Plottable for ScatterSeries<'a> {
-    fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let ds = self.0;
 
         for &point in ds.data_points.iter() {
