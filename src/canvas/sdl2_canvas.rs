@@ -53,6 +53,12 @@ impl <'a> Canvas for SDL2Canvas<'a> {
         self.renderer.draw_line(Point::new(x1 as i32, y1 as i32), Point::new(x2 as i32, y2 as i32));
     }
 
+    fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) {
+        let Pixel { x, y } = self.convert_to_bottom_left_origin(start);
+        let rect = Rect::new(x as i32, (y - height) as i32, width as u32, height as u32);
+        self.renderer.fill_rect(rect);
+    }
+
     fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left_corner: P) {
         let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();

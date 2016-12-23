@@ -39,7 +39,15 @@ pub struct Bar(pub GraphCoord);
 
 impl Plottable for Bar {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
-        let pix = bounds.convert_to_pixel(self.0);
+        let GraphCoord { x, y } = self.0;
+        let bottom_left = bounds.convert_to_pixel((x - 0.5, 0.0));
+        let top_left = bounds.convert_to_pixel((x - 0.5, y));
+        let bottom_right = bounds.convert_to_pixel((x + 0.5, 0.0));
+
+        let width = bottom_right.x - bottom_left.x;
+        let height = top_left.y - bottom_left.y;
+
+        canvas.draw_rect(bottom_left, width, height);
     }
 }
 

@@ -1,6 +1,6 @@
 use data_set::DataSet;
 use plottable::primitives::*;
-use plottable::{Plottable, Series};
+use plottable::{Plottable, HasDataSet};
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
 
@@ -17,7 +17,7 @@ impl <'a> Plottable for LineSeries<'a> {
     }
 }
 
-impl <'a> Series for LineSeries<'a> {
+impl <'a> HasDataSet for LineSeries<'a> {
     fn data_set(&self) -> &DataSet {
         self.0
     }
@@ -36,8 +36,21 @@ impl <'a> Plottable for ScatterSeries<'a> {
     }
 }
 
-impl <'a> Series for ScatterSeries<'a> {
+impl <'a> HasDataSet for ScatterSeries<'a> {
     fn data_set(&self) -> &DataSet {
         self.0
+    }
+}
+
+pub struct BarSeries<'a>(pub &'a DataSet<'a>);
+
+impl <'a> Plottable for BarSeries<'a> {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
+        let ds = self.0;
+
+        for &point in ds.data_points.iter() {
+            canvas.set_color(ds.choose_color());
+            Bar(point).plot(bounds, canvas);
+        }
     }
 }

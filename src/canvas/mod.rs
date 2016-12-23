@@ -19,7 +19,8 @@ pub trait Canvas {
 
     /// Should draw a line from `start` to `end`
     fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P);
-    
+    fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64);
+
     /// Should write text `t` with the width and height defined by the font type
     /// and the `centre` should be where the centre of the text drawn 
     /// is in pixels 

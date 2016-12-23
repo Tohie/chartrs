@@ -12,9 +12,6 @@ pub trait Plottable {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C);
 }
 
-/// Series is an extension to Plottable,
-/// it is meant for anything that can be plotted
-/// as a series on a graph such a line series
-pub trait Series : Plottable {
+pub trait HasDataSet {
     fn data_set(&self) -> &DataSet;
 }
