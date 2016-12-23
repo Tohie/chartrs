@@ -1,7 +1,7 @@
-use graph::DataSet;
-use graph::plottable::primitives::*;
-use graph::plottable::{Plottable, Series};
-use graph::canvas::GraphBounds;
+use data_set::DataSet;
+use plottable::primitives::*;
+use plottable::{Plottable, Series};
+use graph_bounds::GraphBounds;
 use canvas::Canvas;
 
 pub struct LineSeries<'a>(pub &'a DataSet<'a>);

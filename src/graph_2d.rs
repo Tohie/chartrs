@@ -1,17 +1,19 @@
-use graph::data_set::DataSet;
-use graph::{PlotStyle, AxisOptions};
-use graph::plottable::primitives::{Point, Bar};
-use graph::plottable::graphs::LineSeries;
-use graph::plottable::{Axis, AxisKind};
-use graph::canvas::{GraphCanvas, GraphBounds};
+use data_set::DataSet;
+use options::{PlotStyle, AxisOptions};
+use plottable::Plottable;
+use plottable::primitives::{Point, Bar};
+use plottable::graphs::LineSeries;
+use plottable::{Axis, AxisKind};
 use pixel::{GraphCoord, Color};
+use graph_bounds::GraphBounds;
 use canvas::Canvas;
 use utils;
 
 /// A `Graph2D` is a graph with a standard 2d canvas, i.e. a bar, line or a scatter graph
 pub struct Graph2D<'a: 'c, 'b, 'c, 'd, T: 'b> {
     data_sets: &'c [&'a DataSet<'a>],
-    canvas: GraphCanvas<'b, T>,
+    canvas: &'b mut T,
+    bounds: GraphBounds,
     x_axis: Axis<'d>,
     y_axis: Axis<'d>,
 }
@@ -39,25 +41,25 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
         let y_axis = Axis::new(AxisKind::Y, tick_y, max_y, min_y, height, y_opts);
 
         let bounds = GraphBounds::new((min_x, min_y), (max_x, max_y), width, height);
-        let graph_canvas = GraphCanvas::new(bounds, canvas);
 
         Graph2D { 
             data_sets: data_sets, 
-            canvas: graph_canvas,
+            canvas: canvas,
+            bounds: bounds,
             x_axis: x_axis,
             y_axis: y_axis, 
         }
     }
 
     fn plot_line_graph(&mut self, ds: &'a DataSet<'a>) {
-        self.canvas.plot(&LineSeries(ds))
+        self.plot(&LineSeries(ds))
     }
 
     fn plot_point_as_bar(&mut self, gp: GraphCoord) {
         let x = gp.x;
         let y = gp.y;
 
-        self.canvas.plot(&Bar(GraphCoord::new(x, y)));
+        self.plot(&Bar(GraphCoord::new(x, y)));
     }
 
     fn plot_bar_graph(&mut self, ds: &'a DataSet<'a>) {
@@ -70,7 +72,7 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
     fn plot_scatter_graph(&mut self, ds: &'a DataSet<'a>) {
         for &point in ds.data_points.iter() {
             self.update_color(ds);
-            self.canvas.plot(&Point(point, ds.options.point_style));
+            self.plot(&Point(point, ds.options.point_style));
         }
     }
 
@@ -88,14 +90,19 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
         self.canvas.show();
     }
 
-    pub fn plot(&mut self) {
-        {
-            let ref x_axis = self.x_axis;
-            let ref y_axis = self.y_axis;
+    fn plot<P: Plottable>(&mut self, p: &P) {
+        p.plot(&self.bounds, self.canvas)
+    }
+
+    pub fn show(&mut self) {
+        self.canvas.set_color(Color(255, 255, 255));
+        self.canvas.clear();
+
+        let x_axis = self.x_axis;
+        let y_axis = self.y_axis;
             
-            self.canvas.plot(x_axis);
-            self.canvas.plot(y_axis);
-        } 
+        self.plot(&x_axis);
+        self.plot(&y_axis);
 
         self.canvas.set_color(Color(0, 0, 0));
         

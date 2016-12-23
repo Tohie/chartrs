@@ -3,7 +3,8 @@ extern crate chartrs;
 
 use chartrs::canvas::with_sdl2_context;
 use chartrs::pixel::Color;
-use chartrs::{Graph2D, AxisOptions, DataSetOptions, PlotStyle, PointStyle, DataSet};
+use chartrs::options::{DataSetOptions, PlotStyle, PointStyle, AxisOptions};
+use chartrs::{Graph2D, DataSet};
 
 fn main() {
     let font_size = 12;
@@ -35,6 +36,6 @@ fn main() {
         let data_sets = &[&ds1, &ds2, &ds3];
         let mut g1 = Graph2D::new(ctx, data_sets, &x_options, &y_options);
 
-        g1.plot();
+        g1.show();
     });
 }

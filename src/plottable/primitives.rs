@@ -1,8 +1,8 @@
 use canvas::Canvas;
 use pixel::GraphCoord;
-use graph::PointStyle;
-use graph::canvas::GraphBounds;
-use graph::plottable::Plottable;
+use options::PointStyle;
+use graph_bounds::GraphBounds;
+use plottable::Plottable;
 
 pub struct Line(pub GraphCoord, pub GraphCoord);
 

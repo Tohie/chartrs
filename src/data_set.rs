@@ -1,5 +1,5 @@
 use pixel::{GraphCoord, Color};
-use graph::DataSetOptions;
+use options::DataSetOptions;
 use utils;
 use rand;
 use rand::Rng;

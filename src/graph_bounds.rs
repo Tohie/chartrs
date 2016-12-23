@@ -1,7 +1,3 @@
-mod graph_canvas;
-
-pub use self::graph_canvas::GraphCanvas;
-
 use pixel::{GraphCoord, Pixel};
 
 #[derive(Clone, Copy, PartialEq)]

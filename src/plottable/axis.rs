@@ -1,12 +1,15 @@
-use graph::AxisOptions;
-use graph::canvas::GraphBounds;
+use options::AxisOptions;
+use graph_bounds::GraphBounds;
 use canvas::Canvas;
-use graph::plottable::Plottable;
+use plottable::Plottable;
+use pixel::Color;
 
+#[derive(Copy, Clone, PartialEq)]
 pub enum AxisKind {
     X, Y,
 }
 
+#[derive(Copy, Clone, PartialEq)]
 pub struct Axis<'a> {
     kind: AxisKind,
     tick_amount: f64,
@@ -75,6 +78,7 @@ impl<'a> Axis<'a> {
 
 impl<'a> Plottable for Axis<'a> {
     fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C) {
+        canvas.set_color(Color(0, 0, 0));
         self.draw_axis(bounds, canvas);
         self.write_label(bounds, canvas);
     }

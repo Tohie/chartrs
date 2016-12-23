@@ -1,12 +1,3 @@
-mod graph_2d;
-mod data_set;
-mod canvas;
-pub mod plottable;
-
-pub use self::data_set::DataSet;
-pub use self::graph_2d::Graph2D;
-pub use self::plottable::Plottable;
-
 use pixel::Color;
 
 /// `PlotStyle` determines whether a `Graph2D` should be plotted

@@ -5,8 +5,8 @@ pub mod graphs;
 pub use self::axis::{Axis, AxisKind};
 
 use canvas::Canvas;
-use graph::canvas::GraphBounds;
-use graph::DataSet;
+use graph_bounds::GraphBounds;
+use data_set::DataSet;
 
 pub trait Plottable {
     fn plot<C: Canvas>(&self, bounds: &GraphBounds, canvas: &mut C);

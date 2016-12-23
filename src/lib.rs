@@ -30,11 +30,17 @@
 extern crate sdl2;
 extern crate rand;
 
-pub mod graph;
 pub mod pixel;
 pub mod canvas;
+pub mod options;
+mod graph_2d;
+mod data_set;
+pub mod plottable;
+mod graph_bounds;
 mod utils;
 
 pub use pixel::Pixel;
 pub use canvas::Canvas;
-pub use graph::{Graph2D, DataSet, PlotStyle, PointStyle, AxisOptions, DataSetOptions};
+pub use data_set::DataSet;
+pub use graph_bounds::GraphBounds;
+pub use graph_2d::Graph2D;
