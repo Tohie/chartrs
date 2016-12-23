@@ -1,8 +1,7 @@
-use graph::{PointStyle, AxisOptions};
 use graph::canvas::GraphBounds;
-use graph::plottable::{Plottable, Axis, AxisKind};
+use graph::plottable::Plottable;
 use canvas::Canvas;
-use pixel::{Pixel, GraphCoord, Color};
+use pixel::Color;
 
 pub struct GraphCanvas<'a, T: 'a> {
     bounds: GraphBounds,

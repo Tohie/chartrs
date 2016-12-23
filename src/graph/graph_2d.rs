@@ -1,8 +1,8 @@
 use graph::data_set::DataSet;
-use graph::{PlotStyle, DataSetOptions, AxisOptions};
-use graph::plottable::primitives::{Line, Point, Bar};
+use graph::{PlotStyle, AxisOptions};
+use graph::plottable::primitives::{Point, Bar};
 use graph::plottable::graphs::LineSeries;
-use graph::plottable::{Plottable, Axis, AxisKind};
+use graph::plottable::{Axis, AxisKind};
 use graph::canvas::{GraphCanvas, GraphBounds};
 use pixel::{GraphCoord, Color};
 use canvas::Canvas;
@@ -12,7 +12,6 @@ use utils;
 pub struct Graph2D<'a: 'c, 'b, 'c, 'd, T: 'b> {
     data_sets: &'c [&'a DataSet<'a>],
     canvas: GraphCanvas<'b, T>,
-    bounds: GraphBounds,
     x_axis: Axis<'d>,
     y_axis: Axis<'d>,
 }
@@ -40,13 +39,11 @@ impl <'a, 'b, 'c, 'd, T: Canvas> Graph2D<'a, 'b, 'c, 'd, T> {
         let y_axis = Axis::new(AxisKind::Y, tick_y, max_y, min_y, height, y_opts);
 
         let bounds = GraphBounds::new((min_x, min_y), (max_x, max_y), width, height);
-
-        let mut graph_canvas = GraphCanvas::new(bounds, canvas);
+        let graph_canvas = GraphCanvas::new(bounds, canvas);
 
         Graph2D { 
             data_sets: data_sets, 
             canvas: graph_canvas,
-            bounds: bounds,
             x_axis: x_axis,
             y_axis: y_axis, 
         }
