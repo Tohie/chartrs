@@ -47,7 +47,7 @@ impl Plottable for Bar {
         let width = bottom_right.x - bottom_left.x;
         let height = top_left.y - bottom_left.y;
 
-        canvas.draw_rect(bottom_left, width, height);
+        canvas.fill_rect(bottom_left, width, height);
     }
 }
 

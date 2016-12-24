@@ -56,15 +56,31 @@ impl <'a> Canvas for SDL2Canvas<'a> {
     fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) {
         let Pixel { x, y } = self.convert_to_bottom_left_origin(start);
         let rect = Rect::new(x as i32, (y - height) as i32, width as u32, height as u32);
+        self.renderer.draw_rect(rect);
+    }
+
+    fn fill_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) {
+        let Pixel { x, y } = self.convert_to_bottom_left_origin(start);
+        let rect = Rect::new(x as i32, (y - height) as i32, width as u32, height as u32);
         self.renderer.fill_rect(rect);
     }
 
-    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left_corner: P) {
+    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left: P) {
         let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
         let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
 
         let TextureQuery { width, height, .. } = texture.query();
-        let pix = self.convert_to_bottom_left_origin(bottom_left_corner);
+        let pix = self.convert_to_bottom_left_origin(bottom_left);
+        let r = Rect::new(pix.x as i32, (pix.y as i32 - height as i32), width, height);
+        self.renderer.copy(&texture, None, Some(r)).unwrap();
+    }
+    
+    fn write_text_centred<P: Into<Pixel>>(&mut self, t: &str, centre: P) {
+        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
+        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+
+        let TextureQuery { width, height, .. } = texture.query();
+        let pix = self.convert_to_bottom_left_origin(centre);
         let centre_x = pix.x - (width as f64 / 2.0);
         let centre_y = pix.y - (height as f64 / 2.0);
         let r = Rect::new(centre_x as i32, centre_y as i32, width, height);

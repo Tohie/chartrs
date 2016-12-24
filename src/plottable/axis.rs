@@ -6,11 +6,6 @@ use pixel::{Color, Pixel};
 use utils;
 
 #[derive(Copy, Clone, PartialEq)]
-pub enum AxisKind {
-    X, Y,
-}
-
-#[derive(Copy, Clone, PartialEq)]
 pub struct Axis<'a> {
     x_opts: &'a AxisOptions<'a>,
     y_opts: &'a AxisOptions<'a>,
@@ -47,7 +42,7 @@ impl<'a> Axis<'a> {
             canvas.draw_line(pix, Pixel::new(pix.x, pix.y - tick_size));
 
             let number_offset = bounds.width * self.x_opts.number_offset;
-            canvas.write_num(x, (pix.x, pix.y - number_offset));
+            canvas.write_num_centred(x, (pix.x, pix.y - number_offset));
 
             let top = bounds.convert_to_pixel((x, bounds.max.y));
             canvas.draw_line(pix, top);
@@ -63,7 +58,7 @@ impl<'a> Axis<'a> {
             canvas.draw_line((pix.x, pix.y), (pix.x - tick_size, pix.y));
 
             let number_offset = bounds.height * self.y_opts.number_offset;
-            canvas.write_num(y, (pix.x - number_offset, pix.y));
+            canvas.write_num_centred(y, (pix.x - number_offset, pix.y));
 
             let right = bounds.convert_to_pixel((bounds.max.x, y));
             canvas.draw_line(pix, right);
@@ -71,31 +66,25 @@ impl<'a> Axis<'a> {
             y += self.tick_y;
         }
     }
-/*
+
     fn write_label<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
-        let (is_x, is_y) = match self.kind {
-            AxisKind::X => (1.0, 0.0),
-            AxisKind::Y => (0.0, 1.0),
-        };
+        let x = bounds.width / 2.0;
+        let y = bounds.height / 2.0;
 
-        let x = self.max / 2.0;
-        let y = self.max / 2.0;
-        let pix = bounds.convert_to_pixel((x * is_x, y * is_y));
+        let origin = bounds.convert_to_pixel((bounds.min.x, bounds.min.y));
+        let x_offset = bounds.width * self.x_opts.label_offset;
+        let y_offset = bounds.height * self.y_opts.label_offset;
 
-        let label_offset = self.space * self.opts.label_offset;
-
-        let x_offset = label_offset * is_y;
-        let y_offset = label_offset * is_x;
-
-        canvas.write_text(self.opts.label, (pix.x - x_offset, pix.y - y_offset));
+        canvas.write_text_centred(self.x_opts.label, (x, origin.y - y_offset));
+        canvas.write_text_centred(self.y_opts.label, (origin.x - x_offset, y));
     }
-*/
+
 }
 
 impl<'a> Plottable for Axis<'a> {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         canvas.set_color(Color(0, 0, 0));
         self.draw_axis(bounds, canvas);
-        // self.write_label(bounds, canvas);
+        self.write_label(bounds, canvas);
     }
 }

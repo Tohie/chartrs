@@ -1,8 +1,6 @@
 use pixel::{GraphCoord, Pixel};
 use utils;
 use data_set::DataSet;
-use options::AxisOptions;
-use plottable::axis::{AxisKind, Axis};
 use labeller::Label;
 use std::f64;
 

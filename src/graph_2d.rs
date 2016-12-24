@@ -1,9 +1,8 @@
 use data_set::DataSet;
 use options::{PlotStyle, AxisOptions};
-use plottable::{Plottable, HasDataSet};
+use plottable::{Plottable, Axis, Legend};
 use plottable::primitives::Bar;
 use plottable::graphs::{LineSeries, ScatterSeries, BarSeries};
-use plottable::axis::Axis;
 use labeller::Labeller;
 use pixel::{GraphCoord, Color};
 use graph_dimensions::GraphDimensions;
@@ -43,8 +42,6 @@ impl <'a, 'c, T: Canvas> Graph2D<'a, 'c, T> {
             PlotStyle::Bar => self.plot(&BarSeries(ds)),
             PlotStyle::Scatter => self.plot(&ScatterSeries(ds)),
         }
-
-        self.canvas.show();
     }
 
     fn plot<P: Plottable>(&mut self, p: &P) {
@@ -62,12 +59,18 @@ impl <'a, 'c, T: Canvas> Graph2D<'a, 'c, T> {
 
         self.dimensions.adjust_for_axis(x_label, y_label);
         let axis = Axis::new(x_label.step, y_label.step, x_opts, y_opts);
-            
-        self.plot(&axis);
         
+        self.plot(&axis);
+
         let data_sets = self.data_sets.clone();
         for ds in data_sets.iter() {
             self.plot_data_set(ds);
         } 
+
+        let data_sets = self.data_sets.clone();
+        let legend = Legend(&data_sets);
+        self.plot(&legend);
+
+        self.canvas.show();
     }
 }

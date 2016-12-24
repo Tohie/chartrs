@@ -1,8 +1,10 @@
 pub mod axis;
 pub mod primitives;
 pub mod graphs;
+pub mod legend;
 
-pub use self::axis::{Axis, AxisKind};
+pub use self::axis::Axis;
+pub use self::legend::Legend;
 
 use canvas::Canvas;
 use graph_dimensions::GraphDimensions;

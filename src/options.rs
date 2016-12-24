@@ -82,7 +82,7 @@ impl <'a> Default for AxisOptions<'a> {
             tick_count: 10.0,
             tick_size: 0.01,
             number_offset: 0.03,
-            label_offset: 0.04,
+            label_offset: 0.075,
             label: "",
         }
     }
@@ -95,6 +95,7 @@ pub struct DataSetOptions<'a> {
     pub color: Color,
     pub random_color: bool,
     pub colors: Option<&'a [Color]>,
+    pub name: &'a str,
 }
 
 impl <'a> DataSetOptions<'a> {
@@ -128,6 +129,11 @@ impl <'a> DataSetOptions<'a> {
         self.colors = colors.into();
         self
     }
+
+    pub fn name(mut self, name: &'a str) -> Self {
+        self.name = name;
+        self
+    }
 }
 
 impl <'a> Default for DataSetOptions<'a> {
@@ -138,6 +144,7 @@ impl <'a> Default for DataSetOptions<'a> {
             color: Color(0, 0, 0),
             random_color: false,
             colors: None,
+            name: "",
         }
     }
 }

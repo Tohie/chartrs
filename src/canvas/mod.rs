@@ -19,16 +19,18 @@ pub trait Canvas {
 
     /// Should draw a line from `start` to `end`
     fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P);
+    /// Should outline the rect in active color
     fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64);
+    /// Should fill the rect in active color
+    fn fill_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64);
 
-    /// Should write text `t` with the width and height defined by the font type
-    /// and the `centre` should be where the centre of the text drawn 
-    /// is in pixels 
-    fn write_text<P: Into<Pixel>>(&mut self, t: &str, centre: P);
+    /// Should write text starting at bottom_left
+    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left: P);
+    fn write_text_centred<P: Into<Pixel>>(&mut self, t: &str, centre: P);
     /// Convenience method to save converting strings to num for axis labels
-    fn write_num<P: Into<Pixel>>(&mut self, t: f64, p: P) {
+    fn write_num_centred<P: Into<Pixel>>(&mut self, t: f64, p: P) {
         let t = format!("{:.1}", t);
-        self.write_text(&t, p);
+        self.write_text_centred(&t, p);
     }
 
     /// Should fill the screen with the currently active color

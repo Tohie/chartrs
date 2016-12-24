@@ -14,14 +14,23 @@ fn main() {
 
         let line_options = DataSetOptions::new()
             .plot_style(PlotStyle::Line)
-            .color(Color(255, 0, 0));
+            .color(Color(255, 0, 0))
+            .name("Sin");
 
-        let x1 = (-25..25).map(|x| (x as f64).powi(2) as f64).collect::<Vec<f64>>();
+        let line_opt2 = DataSetOptions::new()
+            .plot_style(PlotStyle::Line)
+            .color(Color(0, 0, 255))
+            .name("Cos");
+
+        let x1 = (0..1001).map(|x| (x as f64) / 100.0).collect::<Vec<f64>>();
+        let x2 = x1.clone();
 
         let ds1 = DataSet::from_fn(x1, &line_options, |x| x.sin());
+        let ds2 = DataSet::from_fn(x2, &line_opt2, |x| x.cos());
 
-        let data_sets = vec!(&ds1);
+        let data_sets = vec!(&ds1, &ds2);
         let mut g1 = Graph2D::new(ctx, data_sets);
+        
         g1.show(&x_options, &y_options);
     });
 }
