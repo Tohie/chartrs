@@ -103,7 +103,7 @@ impl Labeller {
     }
     
     // unimplemented
-    #[allow(dead_code)]
+    #[allow(dead_code, unused_variables)]
     fn legibility(&self, min: f64, max: f64, step: f64) -> f64 {
         1.0
     }
@@ -118,7 +118,7 @@ impl Labeller {
         let mut j = 1;
         
         'main_loop: while j < i32::MAX {
-            for i_1 in (0..self.Q.len()) {
+            for i_1 in 0..self.Q.len() {
                 let i = i_1 + 1;
                 let q = self.Q[i_1];
                 sm = self.simplicity_max(i as i32, j as i32);
@@ -142,7 +142,7 @@ impl Labeller {
                         let min_start = (dmax / step - ((k - 1) as f64) * (j as f64)).floor() as i32;
                         let max_start = ((dmin / step).ceil() * (j as f64)) as i32;
 
-                        for start in (min_start..max_start + 1) {
+                        for start in min_start..max_start + 1 {
                             let lmin = (start as f64) * step/(j as f64);
                             let lmax = lmin + step * ((k - 1) as f64);
                             let c = self.coverage(dmin, dmax, lmin, lmax);
