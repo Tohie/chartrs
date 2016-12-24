@@ -1,6 +1,15 @@
 use pixel::GraphCoord;
 use std::f64;
 
+macro_rules! try_opt {
+    ($e:expr) => (
+        match $e {
+            Some(res) => res,
+            None => return,
+        };
+    )
+}
+
 pub fn get_max_coord(coords: &[GraphCoord]) -> GraphCoord {
         find_x_and_y_by_predicate((f64::MIN, f64::MIN), coords, |x_curr, x_max| x_curr > x_max)
     }

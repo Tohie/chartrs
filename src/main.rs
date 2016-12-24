@@ -30,18 +30,22 @@ fn main() {
         let ds1 = DataSet::from_fn(x1, &line_options, |x| x.sin());
         let ds2 = DataSet::from_fn(x2, &line_opt2, |x| (x.cos() * 2.0).powi(3));
 
-        let data_sets = vec!(&ds1);
+        let data_sets = vec!(&ds1, &ds2);
         let mut g1 = Graph2D::with_axises(ctx, data_sets, &x_options, &y_options);
         g1.show();
 
-        let two_seconds = Duration::from_secs(2);
-        thread::sleep(two_seconds);
-
-        g1.add_data_set(&ds2);
+        let mut t = 0.0;
+        let x = 1.0/60.0;
+        let y = -2.0/60.0;
+        let fps = Duration::from_millis(17);
+        'main: loop {
+            t += 1.0/60.0;
+            g1.move_view(x, y);
+            if (t as i32) > 2 {
+                break 'main;
+            }
+            thread::sleep(fps);
+        }
         g1.show();
-
-        thread::sleep(two_seconds);
-
-        g1.move_view(2.0, -4.0);
     });
 }

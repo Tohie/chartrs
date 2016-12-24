@@ -43,13 +43,12 @@ impl GraphDimensions {
     }
 
     // TODO: Handle out of bounds `GraphCoord`s better
-    pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
+    pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Option<Pixel> {
         let mut gp = gp.into();
 
-        if gp.x < self.min.x || gp.y < self.min.y || gp.x > self.max.x || gp.y > self.max.y {
-            return Pixel::new(-1.0, -1.0); // this is a hack, sdl2 won't draw anything if given negative coords;
+        if self.off_grid(gp) {
+            return None;
         }
-
         // TODO: Do something if border are invalid
         // i.e. not between 0 and 1
         
@@ -68,7 +67,7 @@ impl GraphDimensions {
         let actual_height_pixels = self.height - (2.0 * self.height * vertical_border);
         let new_y = y_origin_pixel + (actual_height_pixels * ((gp.y - self.min.y) / y_range));
 
-        Pixel::new(new_x, new_y)
+        Some(Pixel::new(new_x, new_y))
     }
 
     pub fn adjust_for(&mut self, ds: &DataSet) {
@@ -83,6 +82,12 @@ impl GraphDimensions {
     pub fn adjust<G: Into<GraphCoord>>(&mut self, max: G, min: G) {
         self.max = max.into();
         self.min = min.into();
+    }
+
+    pub fn off_grid<G: Into<GraphCoord>>(&self, g: G) -> bool {
+        let GraphCoord { x, y } = g.into();
+
+        x > self.max.x || x < self.min.x || y > self.max.y || y < self.min.y
     }
 }
 

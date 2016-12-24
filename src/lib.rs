@@ -10,6 +10,7 @@
 extern crate sdl2;
 extern crate rand;
 
+#[macro_use] mod utils;
 pub mod pixel;
 pub mod canvas;
 pub mod options;
@@ -17,7 +18,6 @@ mod graph_2d;
 mod data_set;
 pub mod plottable;
 mod graph_dimensions;
-mod utils;
 mod labeller;
 
 pub use pixel::Pixel;

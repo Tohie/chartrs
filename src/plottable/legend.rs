@@ -8,7 +8,8 @@ pub struct Legend<'a>(pub &'a [&'a DataSet<'a>]);
 
 impl<'a> Plottable for Legend<'a> {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
-        let Pixel { x: top_x, y: top_y } = bounds.convert_to_pixel((bounds.max.x, bounds.max.y));
+        let Pixel { x: top_x, y: top_y } = 
+            bounds.convert_to_pixel((bounds.max.x, bounds.max.y)).expect("bounds.max should be on grid");
 
         let width = bounds.width * 0.15;
         let height = bounds.height * 0.1;
