@@ -13,20 +13,32 @@ pub struct DataSet<'a> {
 }
 
 impl <'a> DataSet<'a> {
+    pub fn new(data_points: Vec<GraphCoord>, opts: &'a DataSetOptions<'a>) -> Self {
+        DataSet {
+            data_points: data_points,
+            options: opts,
+        }
+    }
+
+    pub fn from_vecs(x: Vec<f64>, y: Vec<f64>, opts: &'a DataSetOptions<'a>) -> Option<Self> {
+        if x.len() != y.len() {
+            return None;
+        }
+
+        let pixels = x.into_iter().zip(y).map(|(x, y)| GraphCoord::new(x, y)).collect::<Vec<_>>();
+        Some(DataSet::new(pixels, opts))
+    }
+
     /// Takes vector of x co-ordinates as well as options and then uses the given 
     /// function f to create a vector of `GraphCoord`
     pub fn from_fn<F>(x: Vec<f64>, opts: &'a DataSetOptions<'a>, f: F) -> Self 
         where F: Fn(f64) -> f64 {
         
         let xc = x.clone();
-        let y = xc.into_iter().map(f);
-        let pixels = x.into_iter().zip(y).map(|(x, y)| GraphCoord { x: x, y: y}).collect::<Vec<_>>();
-
-        DataSet {
-            data_points: pixels,
-            options: opts,
-        }
+        let y = xc.into_iter().map(f).collect::<Vec<f64>>();
+        DataSet::from_vecs(x, y, opts).expect("y.len() must equal x.len()")
     }
+
 
     /// Gets the maximum value of x and maximum value of y
     /// and returns them as a `GraphCoord`

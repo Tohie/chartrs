@@ -103,7 +103,7 @@ impl GraphDimensions {
         let p = p.into();
 
         let percent_x = ((p.x - self.horizontal_border()) / self.actual_width()) * self.x_range();
-        let percent_y = ((p.x - self.vertical_border()) / self.actual_height()) * self.y_range();
+        let percent_y = ((p.y - self.vertical_border()) / self.actual_height()) * self.y_range();
 
         GraphCoord::new(percent_x, percent_y)
     }

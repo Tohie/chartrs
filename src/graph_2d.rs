@@ -78,8 +78,7 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
             self.plot_data_set(ds);
         } 
 
-        let legend = Legend(&data_sets);
-        self.plot(&legend);
+        self.plot(&Legend(&data_sets));
 
         self.canvas.show();
     }
@@ -101,12 +100,14 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
     pub fn scale_horizontal(&mut self, x: f64) {
         self.dimensions.max.x *= x;
         self.dimensions.min.x *= x;
+
         self.redraw_data_sets(false);
     }
 
     pub fn scale_vertical(&mut self, y: f64) {
         self.dimensions.max.y *= y;
         self.dimensions.min.y *= y;
+        
         self.redraw_data_sets(false);
     }
 
