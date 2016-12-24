@@ -14,20 +14,21 @@ pub enum AxisKind {
 pub struct Axis<'a> {
     x_opts: &'a AxisOptions<'a>,
     y_opts: &'a AxisOptions<'a>,
+    tick_x: f64,
+    tick_y: f64,
 }
 
 impl<'a> Axis<'a> {
-    pub fn new(x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
+    pub fn new(tick_x: f64, tick_y: f64, x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
         Axis {
             x_opts: x_opts,
             y_opts: y_opts,
+            tick_x: tick_x,
+            tick_y: tick_y,
         }
     }
 
     fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
-        let (_, _, tick_x) = utils::pretty_axis_values(bounds.max.x, bounds.min.x, self.x_opts.tick_count);
-        let (_, _, tick_y) = utils::pretty_axis_values(bounds.max.y, bounds.min.y, self.y_opts.tick_count);
-
         let bottom_left = bounds.convert_to_pixel((bounds.min.x, bounds.min.y));
         let top_left = bounds.convert_to_pixel((bounds.min.x, bounds.max.y));
         let bottom_right = bounds.convert_to_pixel((bounds.max.x, bounds.min.y));
@@ -51,7 +52,7 @@ impl<'a> Axis<'a> {
             let top = bounds.convert_to_pixel((x, bounds.max.y));
             canvas.draw_line(pix, top);
 
-            x += tick_x;
+            x += self.tick_x;
         }
 
         let mut y = bounds.min.y;
@@ -67,7 +68,7 @@ impl<'a> Axis<'a> {
             let right = bounds.convert_to_pixel((bounds.max.x, y));
             canvas.draw_line(pix, right);
 
-            y += tick_y;
+            y += self.tick_y;
         }
     }
 /*

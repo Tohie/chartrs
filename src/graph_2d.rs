@@ -4,6 +4,7 @@ use plottable::{Plottable, HasDataSet};
 use plottable::primitives::Bar;
 use plottable::graphs::{LineSeries, ScatterSeries, BarSeries};
 use plottable::axis::Axis;
+use labeller::Labeller;
 use pixel::{GraphCoord, Color};
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
@@ -54,8 +55,13 @@ impl <'a, 'c, T: Canvas> Graph2D<'a, 'c, T> {
         self.canvas.set_color(Color(255, 255, 255));
         self.canvas.clear();
         
-        self.dimensions.adjust_for_axis(x_opts.tick_count, y_opts.tick_count);
-        let axis = Axis::new(x_opts, y_opts);
+        let labeller = Labeller::in_base10();
+        let GraphDimensions { max, min, .. } = self.dimensions;
+        let x_label = labeller.search(min.x, max.x, x_opts.tick_count as i32);
+        let y_label = labeller.search(min.y, max.y, y_opts.tick_count as i32);
+
+        self.dimensions.adjust_for_axis(x_label, y_label);
+        let axis = Axis::new(x_label.step, y_label.step, x_opts, y_opts);
             
         self.plot(&axis);
         

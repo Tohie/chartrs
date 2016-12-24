@@ -1,6 +1,6 @@
 use pixel::GraphCoord;
 use std::f64;
-use wilkinsons::Labeller;
+use labeller::Labeller;
 
 pub fn get_max_coord(coords: &[GraphCoord]) -> GraphCoord {
         find_x_and_y_by_predicate((f64::MIN, f64::MIN), coords, |x_curr, x_max| x_curr > x_max)
@@ -19,17 +19,6 @@ fn find_x_and_y_by_predicate<F, G>(init: G, coords: &[GraphCoord], f: F) -> Grap
         let y = if f(px.y, acc.y) { px.y } else { acc.y } ;
         GraphCoord::new(x, y)
     })
-}
-
-
-// returns the upper and lower limits and the increment size
-pub fn pretty_axis_values(max: f64, min: f64, tick_count: f64) -> (f64, f64, f64) {
-    let wilks_labeller = Labeller::in_base10();
-
-    let label = wilks_labeller.search(min, max, tick_count as i32);
-    println!("{:?}", label);
-
-    (label.max, label.min, label.step)
 }
 
 #[cfg(test)]

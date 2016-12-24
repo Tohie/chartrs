@@ -3,6 +3,7 @@ use utils;
 use data_set::DataSet;
 use options::AxisOptions;
 use plottable::axis::{AxisKind, Axis};
+use labeller::Label;
 use std::f64;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -70,12 +71,9 @@ impl GraphDimensions {
     }
 
     // TODO: Write a test for this after utils::pretty_axis_values
-    pub fn adjust_for_axis(&mut self, x_num_ticks: f64, y_num_ticks: f64) {
-        let (max_x, min_x, tick_x) = utils::pretty_axis_values(self.max.x, self.min.x, x_num_ticks);
-        let (max_y, min_y, tick_y) = utils::pretty_axis_values(self.max.y, self.min.y, y_num_ticks);
-
-        self.max = GraphCoord::new(max_x, max_y);
-        self.min = GraphCoord::new(min_x, min_y);
+    pub fn adjust_for_axis(&mut self, x_label: Label, y_label: Label) {
+        self.max = GraphCoord::new(x_label.max, y_label.max);
+        self.min = GraphCoord::new(x_label.min, y_label.min);
     }
 }
 

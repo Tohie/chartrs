@@ -18,7 +18,7 @@ mod data_set;
 pub mod plottable;
 mod graph_dimensions;
 mod utils;
-mod wilkinsons;
+mod labeller;
 
 pub use pixel::Pixel;
 pub use canvas::Canvas;

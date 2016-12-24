@@ -170,7 +170,7 @@ impl Labeller {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Label {
     pub min: f64,
     pub max: f64,
@@ -185,6 +185,7 @@ impl Label {
         }
     }
 }
+
 
 #[cfg(test)]
 mod tests {
