@@ -10,7 +10,7 @@ use canvas::Canvas;
 pub struct Graph2D<'a, 'c, 'o, T: 'c> {
     pub data_sets: Vec<&'a DataSet<'a>>,
     canvas: &'c mut T,
-    dimensions: GraphDimensions,
+    pub dimensions: GraphDimensions,
     x_opts: Option<&'o AxisOptions<'o>>,
     y_opts: Option<&'o AxisOptions<'o>>,
 }
@@ -96,5 +96,22 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
         self.dimensions.min.y += y;
 
         self.redraw_data_sets(false);
+    }
+
+    pub fn scale_horizontal(&mut self, x: f64) {
+        self.dimensions.max.x *= x;
+        self.dimensions.min.x *= x;
+        self.redraw_data_sets(false);
+    }
+
+    pub fn scale_vertical(&mut self, y: f64) {
+        self.dimensions.max.y *= y;
+        self.dimensions.min.y *= y;
+        self.redraw_data_sets(false);
+    }
+
+    pub fn scale(&mut self, factor: f64) {
+        self.scale_horizontal(factor);
+        self.scale_vertical(factor);
     }
 }

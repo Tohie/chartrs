@@ -41,6 +41,33 @@ impl GraphDimensions {
 
         dimensions
     }
+    
+    // The width of the horizontal_border in pixels
+    // instead of percent
+    fn horizontal_border(&self) -> f64 {
+        self.horizontal_border * self.width
+    }
+
+    fn vertical_border(&self) -> f64 {
+        self.vertical_border * self.height
+    }
+
+    // The width of the grid without the horizontal_border either side
+    fn actual_width(&self) -> f64 {
+        self.width - (2.0 * self.horizontal_border())
+    }
+
+    fn actual_height(&self) -> f64 {
+        self.height - (2.0 * self.vertical_border())
+    }
+
+    fn x_range(&self) -> f64 {
+        self.max.x - self.min.x
+    }
+
+    fn y_range(&self) -> f64 {
+        self.max.y - self.min.y
+    }
 
     pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Option<Pixel> {
         let gp = gp.into();
@@ -49,23 +76,38 @@ impl GraphDimensions {
             return None;
         }
 
-        let origin = Pixel::new(0.0, 0.0);
-        let horizontal_border = self.horizontal_border;
-        let vertical_border = self.vertical_border;
-
-        let x_range = self.max.x - self.min.x;
-        let y_range = self.max.y - self.min.y;
-
-        let x_origin_pixel = origin.x + (self.width * horizontal_border);
-        let actual_width_pixels = self.width - (2.0 * self.width * horizontal_border);
-        let new_x = x_origin_pixel + (actual_width_pixels * ((gp.x - self.min.x) / x_range));
+        let x_origin_pixel = self.horizontal_border();
+        let new_x = x_origin_pixel + (self.actual_width() * ((gp.x - self.min.x) / self.x_range()));
         
-        let y_origin_pixel = origin.y + (self.height * vertical_border);
-        let actual_height_pixels = self.height - (2.0 * self.height * vertical_border);
-        let new_y = y_origin_pixel + (actual_height_pixels * ((gp.y - self.min.y) / y_range));
+        let y_origin_pixel = self.vertical_border();
+        let new_y = y_origin_pixel + (self.actual_height() * ((gp.y - self.min.y) / self.y_range()));
 
         Some(Pixel::new(new_x, new_y))
     }
+
+    pub fn convert_to_graphcoord<P: Into<Pixel>>(&self, p: P) -> Option<GraphCoord> {
+        let p = p.into();
+
+        if p.x < self.horizontal_border || p.x > (self.width - self.horizontal_border) {
+            return None;
+        } 
+        if p.y < self.vertical_border() || p.y > (self.height - self.vertical_border()) {
+            return None;
+        }
+
+        let GraphCoord { x, y } = self.distance_travelled_to_relative(p);
+        Some(Pixel::new(x + self.min.x, y + self.min.y))
+    }
+
+    pub fn distance_travelled_to_relative<P: Into<Pixel>>(&self, p: P) -> GraphCoord {
+        let p = p.into();
+
+        let percent_x = ((p.x - self.horizontal_border()) / self.actual_width()) * self.x_range();
+        let percent_y = ((p.x - self.vertical_border()) / self.actual_height()) * self.y_range();
+
+        GraphCoord::new(percent_x, percent_y)
+    }
+
 
     pub fn adjust_for(&mut self, ds: &DataSet) {
         let max = utils::get_max_coord(&[self.max, ds.get_max_coord()]);
@@ -108,23 +150,22 @@ mod tests {
         dim.max = GraphCoord::new(10.0, 10.0);
         dim.min = GraphCoord::new(-10.0, -10.0);
 
-        assert_eq!(dim.convert_to_pixel((0.0, 0.0)), Pixel::new(300.0, 300.0));
-        assert_eq!(dim.convert_to_pixel((-3.0, 5.0)), Pixel::new(228.0, 420.0));
+        assert_eq!(dim.convert_to_pixel((0.0, 0.0)), Some(Pixel::new(300.0, 300.0)));
+        assert_eq!(dim.convert_to_pixel((-3.0, 5.0)), Some(Pixel::new(228.0, 420.0)));
 
         // with just positive x and y
         dim.min = GraphCoord::new(0.0, 0.0);
-        assert_eq!(dim.convert_to_pixel((2.0, 1.0)), Pixel::new(156.0, 108.0));
+        assert_eq!(dim.convert_to_pixel((2.0, 1.0)), Some(Pixel::new(156.0, 108.0)));
 
         
         // Test horizontal_border and vertical_border settings
         dim.horizontal_border = 0.2;
         dim.vertical_border = 0.3;
 
-        assert_eq!(dim.convert_to_pixel((2.0, 1.0)), Pixel::new(192.0, 204.0));
+        assert_eq!(dim.convert_to_pixel((2.0, 1.0)), Some(Pixel::new(192.0, 204.0)));
 
-        // TODO: convert_to_pixel should probably return None on out of bounds
-        // instead of clamping the value to the axis
-        // assert_eq!(dim.convert_to_pixel((20.0, -3.0)), None)
+        // convert_to_pixel should return None on out of bounds
+        assert_eq!(dim.convert_to_pixel((20.0, -3.0)), None);
 
         // this is meaningless, so we don't have to return anything useful
         // however it should not panic

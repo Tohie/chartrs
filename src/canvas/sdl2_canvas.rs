@@ -3,12 +3,14 @@ use sdl2::render::{Renderer, TextureQuery};
 use sdl2::rect::{Point, Rect};
 use sdl2::pixels::Color;
 use sdl2::event::Event;
+use sdl2::mouse::MouseState;
 use sdl2::ttf::Font;
 use sdl2::keyboard::Keycode;
 
 use canvas::Canvas;
 use pixel;
 use pixel::Pixel;
+use graph_2d::Graph2D;
 
 use std::path::Path;
 
@@ -22,7 +24,7 @@ pub struct SDL2Canvas<'a> {
 }
 
 impl <'a> SDL2Canvas<'a> {
-    fn new(renderer: Renderer<'a>, font: Font<'a>) -> Self {
+    pub fn new(renderer: Renderer<'a>, font: Font<'a>) -> Self {
         SDL2Canvas { renderer: renderer, font: font }
     }
 
@@ -105,40 +107,42 @@ impl <'a> Canvas for SDL2Canvas<'a> {
 /// It will construct a window with given width and height
 /// then pass an `SDL2Canvas` to the function given which allows a graph to be
 /// drawn, it will then loop until the window is closed or esc is pressed
-pub fn with_sdl2_context<F>(w: u32, h: u32, font_size: u16, f: F)
+pub fn with_sdl2_context<'a, 'b, 'c, F>(w: u32, h: u32, font_size: u16, f: F)
     where F: Fn(&mut SDL2Canvas) {
 
-        let sdl_context = sdl2::init().unwrap();
-        let ttf_context = sdl2::ttf::init().unwrap();
-        let video_subsystem = sdl_context.video().unwrap();
+    let sdl_context = sdl2::init().unwrap();
+    let ttf_context = sdl2::ttf::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
 
-        let window = video_subsystem.window("rust-sdl2 demo: Video", w, h)
-            .position_centered()
-            .opengl()
-            .build()
-            .unwrap();
+    let window = video_subsystem.window("rust-sdl2 demo: Video", w, h)
+        .position_centered()
+        .opengl()
+        .build()
+        .unwrap();
 
-        let mut renderer = window.renderer().build().unwrap();
-        renderer.set_draw_color(Color::RGB(255, 255, 255));
-        renderer.clear();
-        renderer.present();
-        renderer.set_draw_color(Color::RGB(0, 0, 0));
+    let mut renderer = window.renderer().build().unwrap();
+    renderer.set_draw_color(Color::RGB(255, 255, 255));
+    renderer.clear();
+    renderer.present();
+    renderer.set_draw_color(Color::RGB(0, 0, 0));
 
-        let font = ttf_context.load_font(Path::new("./Ubuntu-R.ttf"), font_size).unwrap();
-        let mut canvas = SDL2Canvas::new(renderer, font);
+    let font = ttf_context.load_font(Path::new("./Ubuntu-R.ttf"), font_size).unwrap();
+    let mut canvas = SDL2Canvas::new(renderer, font);
 
-        f(&mut canvas);
+    f(&mut canvas);
 
-        let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut event_pump = sdl_context.event_pump().unwrap();
 
-        'running: loop {
-            for event in event_pump.poll_iter() {
-                match event {
-                    Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
-                        break 'running
-                    },
-                    _ => {}
-                }
+    let mut prev_x = -1.0;
+    let mut prev_y = -1.0;
+    'running: loop {
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
+                    break 'running
+                },
+                _ => {}
             }
         }
     }
+}
