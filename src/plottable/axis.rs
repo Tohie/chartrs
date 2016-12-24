@@ -2,25 +2,46 @@ use options::AxisOptions;
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
 use plottable::Plottable;
+use labeller::{Labeller, Label};
 use pixel::{Color, Pixel};
-use utils;
 
 #[derive(Copy, Clone, PartialEq)]
 pub struct Axis<'a> {
     x_opts: &'a AxisOptions<'a>,
     y_opts: &'a AxisOptions<'a>,
-    tick_x: f64,
-    tick_y: f64,
+
+    x_label: Label,
+    y_label: Label,
 }
 
 impl<'a> Axis<'a> {
-    pub fn new(tick_x: f64, tick_y: f64, x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
+    pub fn new(x_label: Label, y_label: Label, x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
         Axis {
             x_opts: x_opts,
             y_opts: y_opts,
-            tick_x: tick_x,
-            tick_y: tick_y,
+            x_label: x_label,
+            y_label: y_label,
         }
+    }
+
+    pub fn from_dimensions_mut(dimensions: &mut GraphDimensions, 
+        x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
+
+        let axis = Axis::from_dimensions(dimensions, x_opts, y_opts);
+        dimensions.adjust((axis.x_label.max, axis.y_label.max), (axis.x_label.min, axis.y_label.min));
+        axis
+    }
+
+    pub fn from_dimensions(dimensions: &GraphDimensions,
+        x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
+
+        let labeller = Labeller::in_base10();
+
+        let GraphDimensions { max, min, .. } = *dimensions;
+        let x_label = labeller.search(min.x, max.x, x_opts.tick_count as i32);
+        let y_label = labeller.search(min.y, max.y, y_opts.tick_count as i32);
+
+        Axis::new(x_label, y_label, x_opts, y_opts)
     }
 
     fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
@@ -47,7 +68,7 @@ impl<'a> Axis<'a> {
             let top = bounds.convert_to_pixel((x, bounds.max.y));
             canvas.draw_line(pix, top);
 
-            x += self.tick_x;
+            x += self.x_label.step;
         }
 
         let mut y = bounds.min.y;
@@ -63,7 +84,7 @@ impl<'a> Axis<'a> {
             let right = bounds.convert_to_pixel((bounds.max.x, y));
             canvas.draw_line(pix, right);
 
-            y += self.tick_y;
+            y += self.y_label.step;
         }
     }
 

@@ -1,6 +1,5 @@
 use pixel::GraphCoord;
 use std::f64;
-use labeller::Labeller;
 
 pub fn get_max_coord(coords: &[GraphCoord]) -> GraphCoord {
         find_x_and_y_by_predicate((f64::MIN, f64::MIN), coords, |x_curr, x_max| x_curr > x_max)

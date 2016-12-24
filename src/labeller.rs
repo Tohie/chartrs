@@ -6,7 +6,7 @@ use std::i32;
 //[1] An Extension of Wilkinson's Algorithm for positioning Tick Labels on Axes
 //(Justin Talbot, Sharon Lin, Pat Hanrahan)
 pub struct Labeller {
-    Q: Vec<f64>,
+    q: Vec<f64>,
     base: f64,
     w: Vec<f64>,
     eps: f64,
@@ -14,9 +14,9 @@ pub struct Labeller {
 }
 
 impl Labeller {
-    pub fn new(Q: Vec<f64>, base: f64, w: Vec<f64>, eps: f64) -> Labeller {
+    pub fn new(q: Vec<f64>, base: f64, w: Vec<f64>, eps: f64) -> Labeller {
         Labeller {
-            Q: Q,
+            q: q,
             base: base,
             w: w,
             eps: eps,
@@ -25,8 +25,8 @@ impl Labeller {
         }
     }
 
-    pub fn using_base(Q: Vec<f64>, base: f64) -> Labeller {
-        Labeller::new(Q, base, vec!(0.25, 0.2, 0.5, 0.05), 1e-10)
+    pub fn using_base(q: Vec<f64>, base: f64) -> Labeller {
+        Labeller::new(q, base, vec!(0.25, 0.2, 0.5, 0.05), 1e-10)
     }
     
     pub fn in_base10() -> Labeller {
@@ -55,16 +55,16 @@ impl Labeller {
     }
     
     fn simplicity(&self, i: i32, j: i32, min: f64, max: f64, step: f64) -> f64 {
-        if self.Q.len() > 1 {
-            1.0 - (i as f64) / ((self.Q.len() - 1) as f64) - (j as f64) + self.v(min, max, step)
+        if self.q.len() > 1 {
+            1.0 - (i as f64) / ((self.q.len() - 1) as f64) - (j as f64) + self.v(min, max, step)
         } else {
             1.0 - (j as f64) + self.v(min, max, step)
         }
     }
     
     fn simplicity_max(&self, i: i32, j: i32) -> f64 {
-        if self.Q.len() > 1 {
-            1.0 - (i as f64) / ((self.Q.len() - 1) as f64) - (j as f64) + 1.0
+        if self.q.len() > 1 {
+            1.0 - (i as f64) / ((self.q.len() - 1) as f64) - (j as f64) + 1.0
         } else {
             1.0 - (j as f64) + 1.0
         }
@@ -118,9 +118,9 @@ impl Labeller {
         let mut j = 1;
         
         'main_loop: while j < i32::MAX {
-            for i_1 in 0..self.Q.len() {
+            for i_1 in 0..self.q.len() {
                 let i = i_1 + 1;
-                let q = self.Q[i_1];
+                let q = self.q[i_1];
                 sm = self.simplicity_max(i as i32, j as i32);
                 if self.w(sm, 1.0, 1.0, 1.0) < best_score {
                     break 'main_loop;

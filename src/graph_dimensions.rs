@@ -2,6 +2,7 @@ use pixel::{GraphCoord, Pixel};
 use utils;
 use data_set::DataSet;
 use labeller::Label;
+use canvas::Canvas;
 use std::f64;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -30,14 +31,24 @@ impl GraphDimensions {
         }
     }
 
+    pub fn from<C: Canvas>(canvas: &mut C, data_sets: &[&DataSet]) -> GraphDimensions {
+        let (width, height) = canvas.get_size();
+        let mut dimensions = GraphDimensions::new(width, height);
+
+        for ds in data_sets.iter() {
+            dimensions.adjust_for(ds);
+        }
+
+        dimensions
+    }
+
     // TODO: Handle out of bounds `GraphCoord`s better
     pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Pixel {
         let mut gp = gp.into();
 
-        if gp.x < self.min.x { gp.x = self.min.x };
-        if gp.y < self.min.y { gp.y = self.min.y };
-        if gp.x > self.max.x { gp.x = self.max.x };
-        if gp.y > self.max.y { gp.y = self.max.y };
+        if gp.x < self.min.x || gp.y < self.min.y || gp.x > self.max.x || gp.y > self.max.y {
+            return Pixel::new(-1.0, -1.0); // this is a hack, sdl2 won't draw anything if given negative coords;
+        }
 
         // TODO: Do something if border are invalid
         // i.e. not between 0 and 1
@@ -69,9 +80,9 @@ impl GraphDimensions {
     }
 
     // TODO: Write a test for this after utils::pretty_axis_values
-    pub fn adjust_for_axis(&mut self, x_label: Label, y_label: Label) {
-        self.max = GraphCoord::new(x_label.max, y_label.max);
-        self.min = GraphCoord::new(x_label.min, y_label.min);
+    pub fn adjust<G: Into<GraphCoord>>(&mut self, max: G, min: G) {
+        self.max = max.into();
+        self.min = min.into();
     }
 }
 
