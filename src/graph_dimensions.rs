@@ -1,8 +1,8 @@
 use pixel::{GraphCoord, Pixel};
 use utils;
 use data_set::DataSet;
-use labeller::Label;
 use canvas::Canvas;
+use plottable::Axis;
 use std::f64;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -42,16 +42,13 @@ impl GraphDimensions {
         dimensions
     }
 
-    // TODO: Handle out of bounds `GraphCoord`s better
     pub fn convert_to_pixel<G: Into<GraphCoord>>(&self, gp: G) -> Option<Pixel> {
-        let mut gp = gp.into();
+        let gp = gp.into();
 
         if self.off_grid(gp) {
             return None;
         }
-        // TODO: Do something if border are invalid
-        // i.e. not between 0 and 1
-        
+
         let origin = Pixel::new(0.0, 0.0);
         let horizontal_border = self.horizontal_border;
         let vertical_border = self.vertical_border;
@@ -78,10 +75,15 @@ impl GraphDimensions {
         self.min = min;
     }
 
-    // TODO: Write a test for this after utils::pretty_axis_values
-    pub fn adjust<G: Into<GraphCoord>>(&mut self, max: G, min: G) {
-        self.max = max.into();
-        self.min = min.into();
+    pub fn adjust_for_axis(&mut self, axis: &Axis) {
+        let x_max = axis.x_label.max;
+        let x_min = axis.x_label.min;
+
+        let y_max = axis.y_label.max;
+        let y_min = axis.y_label.min;
+
+        self.max = GraphCoord::new(x_max, y_max);
+        self.min = GraphCoord::new(x_min, y_min);
     }
 
     pub fn off_grid<G: Into<GraphCoord>>(&self, g: G) -> bool {

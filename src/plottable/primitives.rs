@@ -3,15 +3,15 @@ use pixel::GraphCoord;
 use options::PointStyle;
 use graph_dimensions::GraphDimensions;
 use plottable::Plottable;
-use utils;
 
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Line(pub GraphCoord, pub GraphCoord);
 
 impl Plottable for Line {
     fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
         let start = try_opt!(bounds.convert_to_pixel(self.0));
         let end = try_opt!(bounds.convert_to_pixel(self.1));
-
+        
         canvas.draw_line(start, end);
     }
 }

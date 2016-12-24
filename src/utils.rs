@@ -1,4 +1,6 @@
 use pixel::GraphCoord;
+use graph_dimensions::GraphDimensions;
+use plottable::primitives::Line;
 use std::f64;
 
 macro_rules! try_opt {
@@ -27,6 +29,34 @@ fn find_x_and_y_by_predicate<F, G>(init: G, coords: &[GraphCoord], f: F) -> Grap
         let y = if f(px.y, acc.y) { px.y } else { acc.y } ;
         GraphCoord::new(x, y)
     })
+}
+
+pub fn interp_to_grid(dims: &GraphDimensions, line: Line) -> Line {
+    let start = line.0;
+    let end = line.1;
+
+    let max = dims.max;
+    let min = dims.min;
+
+    let m = (start.x - end.x) / (start.y - end.y);
+    let c = start.y - (m*start.x);
+
+    let start = if dims.off_grid(start) { interp(max, min, start, m, c) } else { start };
+    let end = if dims.off_grid(end) { interp(max, min, end, m, c) } else { end };
+
+    Line(start, end)
+}
+
+fn interp(max: GraphCoord, min: GraphCoord, point: GraphCoord, m: f64, c: f64) -> GraphCoord {
+    if point.x > max.x {
+        GraphCoord::new(max.x, m*max.x - c)
+    } else if point.x < min.x {
+        GraphCoord::new(min.x, m*min.x - c)
+    } else if point.y > max.y {
+        GraphCoord::new((max.y - c) / m, max.y)
+    } else {
+        GraphCoord::new((min.y - c) / m, min.y)
+    }
 }
 
 #[cfg(test)]

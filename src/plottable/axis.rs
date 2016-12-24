@@ -10,8 +10,8 @@ pub struct Axis<'a> {
     x_opts: &'a AxisOptions<'a>,
     y_opts: &'a AxisOptions<'a>,
 
-    x_label: Label,
-    y_label: Label,
+    pub x_label: Label,
+    pub y_label: Label,
 }
 
 impl<'a> Axis<'a> {
@@ -22,14 +22,6 @@ impl<'a> Axis<'a> {
             x_label: x_label,
             y_label: y_label,
         }
-    }
-
-    pub fn from_dimensions_mut(dimensions: &mut GraphDimensions, 
-        x_opts: &'a AxisOptions<'a>, y_opts: &'a AxisOptions<'a>) -> Axis<'a> {
-
-        let axis = Axis::from_dimensions(dimensions, x_opts, y_opts);
-        dimensions.adjust((axis.x_label.max, axis.y_label.max), (axis.x_label.min, axis.y_label.min));
-        axis
     }
 
     pub fn from_dimensions(dimensions: &GraphDimensions,

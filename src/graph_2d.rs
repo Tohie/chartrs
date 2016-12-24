@@ -2,7 +2,6 @@ use data_set::DataSet;
 use options::{PlotStyle, AxisOptions};
 use plottable::{Plottable, Axis, Legend};
 use plottable::graphs::{LineSeries, ScatterSeries, BarSeries};
-use labeller::Labeller;
 use pixel::Color;
 use graph_dimensions::GraphDimensions;
 use canvas::Canvas;
@@ -24,12 +23,7 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
     pub fn with_axises<A>(canvas: &'c mut T, data_sets: Vec<&'a DataSet<'a>>, x_opts: A, y_opts: A) -> Self
         where A: Into<Option<&'o AxisOptions<'o>>> {
 
-        let (width, height) = canvas.get_size();
-        let mut dimensions = GraphDimensions::new(width, height);
-
-        for ds in data_sets.iter() {
-            dimensions.adjust_for(ds);
-        }
+        let dimensions = GraphDimensions::from(canvas, &data_sets);
 
         Graph2D {
             data_sets: data_sets,
@@ -57,22 +51,23 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
         p.plot(&self.dimensions, self.canvas)
     }
 
+    pub fn fit_view_to_data(&mut self) {
+        self.dimensions = GraphDimensions::from(self.canvas, &self.data_sets);
+    }
+
     fn redraw_data_sets(&mut self, prettify_axises: bool) {
         self.canvas.set_color(Color(255, 255, 255));
         self.canvas.clear();
         
-        // We reate a new axis each time show is called because axis can't be stored on Graph2D and plotted
+        // We create a new axis each time show is called because axis can't be stored on Graph2D and plotted
         // without cloning it anyway because you would have borrow self mutably
         // to plot axis and borrow self.axis at the same
-        // This also saves us from adjusting the dimensions to allow for pretty axis values every time someone
-        // adds a data_set to the graph as well
         match (self.x_opts, self.y_opts) {
             (Some(x_opts), Some(y_opts)) => {
-                let axis = if prettify_axises {
-                    Axis::from_dimensions_mut(&mut self.dimensions, x_opts, y_opts)
-                } else {
-                    Axis::from_dimensions(&self.dimensions, x_opts, y_opts)
-                };
+                let axis = Axis::from_dimensions(&self.dimensions, x_opts, y_opts);
+                if prettify_axises {
+                    self.dimensions.adjust_for_axis(&axis);
+                }    
                 self.plot(&axis);
             }
             _ => {},

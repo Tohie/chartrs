@@ -46,6 +46,8 @@ fn main() {
             }
             thread::sleep(fps);
         }
+        thread::sleep(Duration::from_secs(2));
+        g1.fit_view_to_data();
         g1.show();
     });
 }
