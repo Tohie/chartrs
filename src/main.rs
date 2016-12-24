@@ -17,7 +17,7 @@ fn main() {
             .plot_style(PlotStyle::Bar)
             .random_color(true);
 
-        let x1 = (-5..5).map(|x| x as f64).collect::<Vec<f64>>();
+        let x1 = (-25..25).map(|x| x as f64).collect::<Vec<f64>>();
 
         let ds1 = DataSet::from_fn(x1, &bar_options, |x| x.powi(2));
 
