@@ -1,5 +1,5 @@
-//! This module defines types that will be used to create common types
-//! such as pixels or colours, in order to make arguments to functions
+//! This module defines types that will be used to represent common graphical
+//! elements such as pixels or colours, in order to make arguments to functions
 //! clearer
 
 use rand::{Rand, Rng};

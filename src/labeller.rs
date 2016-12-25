@@ -2,9 +2,9 @@ use std::i32;
 
 /// Implementation of the extended Wilkinson's algorithm for pretty axis labels
 
-//Reference:
-//[1] An Extension of Wilkinson's Algorithm for positioning Tick Labels on Axes
-//(Justin Talbot, Sharon Lin, Pat Hanrahan)
+/// Reference:
+/// [1] An Extension of Wilkinson's Algorithm for positioning Tick Labels on Axes
+/// (Justin Talbot, Sharon Lin, Pat Hanrahan)
 pub struct Labeller {
     q: Vec<f64>,
     base: f64,

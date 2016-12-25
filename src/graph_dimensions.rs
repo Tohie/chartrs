@@ -102,8 +102,8 @@ impl GraphDimensions {
     pub fn distance_travelled_to_relative<P: Into<Pixel>>(&self, p: P) -> GraphCoord {
         let p = p.into();
 
-        let percent_x = ((p.x - self.horizontal_border()) / self.actual_width()) * self.x_range();
-        let percent_y = ((p.y - self.vertical_border()) / self.actual_height()) * self.y_range();
+        let percent_x = (p.x / self.actual_width()) * self.x_range();
+        let percent_y = (p.y / self.actual_height()) * self.y_range();
 
         GraphCoord::new(percent_x, percent_y)
     }
@@ -117,6 +117,9 @@ impl GraphDimensions {
         self.min = min;
     }
 
+    // Axis is a special case since the labelling algorithm will
+    // pick the best looking min, max and tick for the axis labelling
+    // therefore we should just use the max and min that the axis calculated
     pub fn adjust_for_axis(&mut self, axis: &Axis) {
         let x_max = axis.x_label.max;
         let x_min = axis.x_label.min;
