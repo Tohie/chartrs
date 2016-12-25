@@ -39,7 +39,7 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
         self.data_sets.push(data_set);
     }
 
-    pub fn plot_data_set(&mut self, ds: &'a DataSet) {
+    pub fn plot_data_set(&mut self, ds: &'a DataSet) -> Result<(), T::Err> {
         match ds.options.plot_style {
             PlotStyle::Line => self.plot(&LineSeries(ds)),
             PlotStyle::Bar => self.plot(&BarSeries(ds)),
@@ -47,7 +47,7 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
         }
     }
 
-    fn plot<P: Plottable>(&mut self, p: &P) {
+    fn plot<P: Plottable>(&mut self, p: &P) -> Result<(), T::Err> {
         p.plot(&self.dimensions, self.canvas)
     }
 
@@ -55,7 +55,7 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
         self.dimensions = GraphDimensions::from(self.canvas, &self.data_sets);
     }
 
-    fn redraw_data_sets(&mut self, prettify_axises: bool) {
+    fn redraw_data_sets(&mut self, prettify_axises: bool) -> Result<(), T::Err> {
         self.canvas.set_color(Color(255, 255, 255));
         self.canvas.clear();
         
@@ -68,51 +68,52 @@ impl <'a, 'c, 'o, T: Canvas> Graph2D<'a, 'c, 'o, T> {
                 if prettify_axises {
                     self.dimensions.adjust_for_axis(&axis);
                 }    
-                self.plot(&axis);
+                self.plot(&axis)?;
             }
             _ => {},
         };
 
         let data_sets = self.data_sets.clone();
         for ds in data_sets.iter() {
-            self.plot_data_set(ds);
+            self.plot_data_set(ds)?;
         } 
 
-        self.plot(&Legend(&data_sets));
+        self.plot(&Legend(&data_sets))?;
 
         self.canvas.show();
+        Ok(())
     }
 
-    pub fn show(&mut self) {
-        self.redraw_data_sets(true);
+    pub fn show(&mut self) -> Result<(), T::Err> {
+        self.redraw_data_sets(true)
     }
 
-    pub fn move_view(&mut self, x: f64, y: f64) {
+    pub fn move_view(&mut self, x: f64, y: f64) -> Result<(), T::Err> {
         self.dimensions.max.x += x;
         self.dimensions.min.x += x;
 
         self.dimensions.max.y += y;
         self.dimensions.min.y += y;
 
-        self.redraw_data_sets(false);
+        self.redraw_data_sets(false)
     }
 
-    pub fn scale_horizontal(&mut self, x: f64) {
+    pub fn scale_horizontal(&mut self, x: f64) -> Result<(), T::Err> {
         self.dimensions.max.x *= x;
         self.dimensions.min.x *= x;
 
-        self.redraw_data_sets(false);
+        self.redraw_data_sets(false)
     }
 
-    pub fn scale_vertical(&mut self, y: f64) {
+    pub fn scale_vertical(&mut self, y: f64) -> Result<(), T::Err> {
         self.dimensions.max.y *= y;
         self.dimensions.min.y *= y;
         
-        self.redraw_data_sets(false);
+        self.redraw_data_sets(false)
     }
 
-    pub fn scale(&mut self, factor: f64) {
-        self.scale_horizontal(factor);
-        self.scale_vertical(factor);
+    pub fn scale(&mut self, factor: f64) -> Result<(), T::Err> {
+        self.scale_horizontal(factor)?;
+        self.scale_vertical(factor)
     }
 }

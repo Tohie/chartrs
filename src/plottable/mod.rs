@@ -11,7 +11,7 @@ use graph_dimensions::GraphDimensions;
 use data_set::DataSet;
 
 pub trait Plottable {
-    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C);
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) -> Result<(), C::Err>;
 }
 
 pub trait HasDataSet {

@@ -7,7 +7,7 @@ macro_rules! try_opt {
     ($e:expr) => (
         match $e {
             Some(res) => res,
-            None => return,
+            None => return Ok(()),
         };
     )
 }

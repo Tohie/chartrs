@@ -36,7 +36,7 @@ impl<'a> Axis<'a> {
         Axis::new(x_label, y_label, x_opts, y_opts)
     }
 
-    fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
+    fn draw_axis<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) -> Result<(), C::Err> {
         let bottom_left = bounds.convert_to_pixel((bounds.min.x, bounds.min.y))
             .expect("axis always should be on grid");
         let top_left = bounds.convert_to_pixel((bounds.min.x, bounds.max.y))
@@ -46,10 +46,10 @@ impl<'a> Axis<'a> {
         let top_right = bounds.convert_to_pixel((bounds.max.x, bounds.max.y))
             .unwrap();
 
-        canvas.draw_line(bottom_left, bottom_right);
-        canvas.draw_line(bottom_left, top_left);
-        canvas.draw_line(top_left, top_right);
-        canvas.draw_line(bottom_right, top_right);
+        canvas.draw_line(bottom_left, bottom_right)?;
+        canvas.draw_line(bottom_left, top_left)?;
+        canvas.draw_line(top_left, top_right)?;
+        canvas.draw_line(bottom_right, top_right)?;
 
         let mut x = bounds.min.x;
         while x <= bounds.max.x {
@@ -57,14 +57,14 @@ impl<'a> Axis<'a> {
                 .expect("axis should always be on grid");
             
             let tick_size = bounds.width * self.x_opts.tick_size;
-            canvas.draw_line(pix, Pixel::new(pix.x, pix.y - tick_size));
+            canvas.draw_line(pix, Pixel::new(pix.x, pix.y - tick_size))?;
 
             let number_offset = bounds.width * self.x_opts.number_offset;
-            canvas.write_num_centred(x, (pix.x, pix.y - number_offset));
+            canvas.write_num_centred(x, (pix.x, pix.y - number_offset))?;
 
             let top = bounds.convert_to_pixel((x, bounds.max.y))
                 .expect("axis should always be on grid");
-            canvas.draw_line(pix, top);
+            canvas.draw_line(pix, top)?;
 
             x += self.x_label.step;
         }
@@ -75,20 +75,22 @@ impl<'a> Axis<'a> {
                 .expect("axis should always be on grid");
             
             let tick_size = bounds.height * self.y_opts.tick_size;
-            canvas.draw_line((pix.x, pix.y), (pix.x - tick_size, pix.y));
+            canvas.draw_line((pix.x, pix.y), (pix.x - tick_size, pix.y))?;
 
             let number_offset = bounds.height * self.y_opts.number_offset;
-            canvas.write_num_centred(y, (pix.x - number_offset, pix.y));
+            canvas.write_num_centred(y, (pix.x - number_offset, pix.y))?;
 
             let right = bounds.convert_to_pixel((bounds.max.x, y))
                 .expect("axis should always be on grid");
-            canvas.draw_line(pix, right);
+            canvas.draw_line(pix, right)?;
 
             y += self.y_label.step;
         }
+
+        Ok(())
     }
 
-    fn write_label<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
+    fn write_label<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) -> Result<(), C::Err> {
         let x = bounds.width / 2.0;
         let y = bounds.height / 2.0;
 
@@ -97,16 +99,16 @@ impl<'a> Axis<'a> {
         let x_offset = bounds.width * self.x_opts.label_offset;
         let y_offset = bounds.height * self.y_opts.label_offset;
 
-        canvas.write_text_centred(self.x_opts.label, (x, origin.y - y_offset));
-        canvas.write_text_centred(self.y_opts.label, (origin.x - x_offset, y));
+        canvas.write_text_centred(self.x_opts.label, (x, origin.y - y_offset))?;
+        canvas.write_text_centred(self.y_opts.label, (origin.x - x_offset, y))
     }
 
 }
 
 impl<'a> Plottable for Axis<'a> {
-    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) {
+    fn plot<C: Canvas>(&self, bounds: &GraphDimensions, canvas: &mut C) -> Result<(), C::Err> {
         canvas.set_color(Color(0, 0, 0));
-        self.draw_axis(bounds, canvas);
-        self.write_label(bounds, canvas);
+        self.draw_axis(bounds, canvas)?;
+        self.write_label(bounds, canvas)
     }
 }

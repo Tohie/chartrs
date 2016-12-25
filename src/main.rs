@@ -1,9 +1,11 @@
 extern crate chartrs;
 
-use chartrs::canvas::with_sdl2_context;
+use chartrs::canvas::sdl2::plot;
 use chartrs::options::{DataSetOptions, PlotStyle, AxisOptions};
 use chartrs::pixel;
 use chartrs::DataSet;
+
+use std::error::Error;
 
 fn main() {
     let font_size = 12;
@@ -30,5 +32,13 @@ fn main() {
 
     let data_sets = vec!(&ds1, &ds2);
 
-    with_sdl2_context(w, h, font_size, data_sets, &x_options, &y_options);
+    let res = plot(w, h, font_size, data_sets, &x_options, &y_options);
+
+    match res {
+        Err(e) => match e.cause() {
+            Some(cause) => println!("Error: {}, cause: {}", e.description(), cause),
+            None => println!("Error: {}, unknown cause", e.description())
+        },
+        Ok(_) => {},
+    }
 }

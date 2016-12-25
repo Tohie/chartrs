@@ -13,6 +13,7 @@ use pixel::Pixel;
 use graph_2d::Graph2D;
 use options::AxisOptions;
 use data_set::DataSet;
+use canvas::sdl2::SDL2Error;
 
 use std::path::Path;
 
@@ -26,7 +27,7 @@ pub struct SDL2Canvas<'a> {
 }
 
 impl <'a> SDL2Canvas<'a> {
-    pub fn new(renderer: Renderer<'a>, font: Font<'a>) -> Self {
+    pub fn new(renderer: Renderer<'a>, font: Font<'a>) -> SDL2Canvas<'a> {
         SDL2Canvas { renderer: renderer, font: font }
     }
 
@@ -41,6 +42,8 @@ impl <'a> SDL2Canvas<'a> {
 }
 
 impl <'a> Canvas for SDL2Canvas<'a> {
+    type Err = SDL2Error;
+
     fn get_origin(&self) -> Pixel {
         Pixel::new(0.0, 0.0)
     }
@@ -50,45 +53,55 @@ impl <'a> Canvas for SDL2Canvas<'a> {
         (point.x() as f64, point.y() as f64)
     }
 
-    fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P) {
+    fn draw_line<P: Into<Pixel>>(&mut self, start: P, end: P) -> Result<(), SDL2Error> {
         let Pixel { x: x1, y: y1 } = self.convert_to_bottom_left_origin(start);
         let Pixel { x: x2, y: y2 } = self.convert_to_bottom_left_origin(end);
 
-        self.renderer.draw_line(Point::new(x1 as i32, y1 as i32), Point::new(x2 as i32, y2 as i32));
+        self.renderer.draw_line(Point::new(x1 as i32, y1 as i32), Point::new(x2 as i32, y2 as i32))?;
+
+        Ok(())
     }
 
-    fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) {
+    fn draw_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) -> Result<(), SDL2Error> {
         let Pixel { x, y } = self.convert_to_bottom_left_origin(start);
         let rect = Rect::new(x as i32, (y - height) as i32, width as u32, height as u32);
-        self.renderer.draw_rect(rect);
+        self.renderer.draw_rect(rect)?;
+
+        Ok(())
     }
 
-    fn fill_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) {
+    fn fill_rect<P: Into<Pixel>>(&mut self, start: P, width: f64, height: f64) -> Result<(), SDL2Error> {
         let Pixel { x, y } = self.convert_to_bottom_left_origin(start);
         let rect = Rect::new(x as i32, (y - height) as i32, width as u32, height as u32);
-        self.renderer.fill_rect(rect);
+        self.renderer.fill_rect(rect)?;
+
+        Ok(())
     }
 
-    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left: P) {
-        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
-        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+    fn write_text<P: Into<Pixel>>(&mut self, t: &str, bottom_left: P) -> Result<(), SDL2Error> {
+        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0))?;
+        let texture = self.renderer.create_texture_from_surface(&surface)?;
 
         let TextureQuery { width, height, .. } = texture.query();
         let pix = self.convert_to_bottom_left_origin(bottom_left);
         let r = Rect::new(pix.x as i32, (pix.y as i32 - height as i32), width, height);
-        self.renderer.copy(&texture, None, Some(r)).unwrap();
+        self.renderer.copy(&texture, None, Some(r))?;
+
+        Ok(())
     }
     
-    fn write_text_centred<P: Into<Pixel>>(&mut self, t: &str, centre: P) {
-        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0)).unwrap();
-        let texture = self.renderer.create_texture_from_surface(&surface).unwrap();
+    fn write_text_centred<P: Into<Pixel>>(&mut self, t: &str, centre: P) -> Result<(), SDL2Error> {
+        let surface = self.font.render(t).blended(Color::RGB(0, 0, 0))?;
+        let texture = self.renderer.create_texture_from_surface(&surface)?;
 
         let TextureQuery { width, height, .. } = texture.query();
         let pix = self.convert_to_bottom_left_origin(centre);
         let centre_x = pix.x - (width as f64 / 2.0);
         let centre_y = pix.y - (height as f64 / 2.0);
         let r = Rect::new(centre_x as i32, centre_y as i32, width, height);
-        self.renderer.copy(&texture, None, Some(r)).unwrap();
+        self.renderer.copy(&texture, None, Some(r))?;
+
+        Ok(())
     }
     
     fn clear(&mut self) {
@@ -109,8 +122,8 @@ impl <'a> Canvas for SDL2Canvas<'a> {
 /// It will construct a window with given width and height
 /// then pass an `SDL2Canvas` to the function given which allows a graph to be
 /// drawn, it will then loop until the window is closed or esc is pressed
-pub fn with_sdl2_context<'a, 'c, 'o, A>(w: u32, h: u32, font_size: u16,
-    data_sets: Vec<&'a DataSet<'a>>, x_opts: A, y_opts: A)
+pub fn plot<'a, 'c, 'o, A>(w: u32, h: u32, font_size: u16,
+    data_sets: Vec<&'a DataSet<'a>>, x_opts: A, y_opts: A) -> Result<(), SDL2Error>
     where A: Into<Option<&'o AxisOptions<'o>>> {
 
     let sdl_context = sdl2::init().unwrap();
@@ -133,9 +146,9 @@ pub fn with_sdl2_context<'a, 'c, 'o, A>(w: u32, h: u32, font_size: u16,
     let mut canvas = SDL2Canvas::new(renderer, font);
 
     let mut graph = Graph2D::with_axises(&mut canvas, data_sets, x_opts, y_opts);
-    graph.show();
+    graph.show()?;
 
-    let mut event_pump = sdl_context.event_pump().unwrap();
+    let mut event_pump = sdl_context.event_pump()?;
 
     let mut prev_x = -1.0;
     let mut prev_y = -1.0;
@@ -177,7 +190,7 @@ pub fn with_sdl2_context<'a, 'c, 'o, A>(w: u32, h: u32, font_size: u16,
                         match (curr_coord, prev_coord) {
                             (Some(_), Some(_)) => {
                                 let delta = graph.dimensions.distance_travelled_to_relative((prev_x - x, y - prev_y));
-                                graph.move_view(delta.x, delta.y);
+                                graph.move_view(delta.x, delta.y)?;
                             },
                             _ => {},
                         }
@@ -190,4 +203,6 @@ pub fn with_sdl2_context<'a, 'c, 'o, A>(w: u32, h: u32, font_size: u16,
             }
         }
     }
+
+    Ok(())
 }
