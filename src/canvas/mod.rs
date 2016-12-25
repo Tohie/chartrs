@@ -2,7 +2,8 @@
 //! Anything that implements this crate correctly
 //! can be used by Graph2D to draw a graph on
 //! see the SDL2 implementation for an example
-
+#[cfg(test)]
+pub mod mock_canvas;
 pub mod sdl2;
 
 use pixel::{Pixel, Color};

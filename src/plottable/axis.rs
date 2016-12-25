@@ -112,3 +112,34 @@ impl<'a> Plottable for Axis<'a> {
         self.write_label(bounds, canvas)
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use canvas::mock_canvas::MockCanvas;
+    use graph_dimensions::GraphDimensions;
+    use options::AxisOptions;
+    use pixel::{GraphCoord, Color};
+    use plottable::Plottable;
+
+    #[test]
+    fn test_plot() {
+        let mut fake_canvas = MockCanvas::new();
+        let mut dims = GraphDimensions::new(600.0, 600.0);
+        dims.max = GraphCoord::new(15.0, 15.0);
+        dims.min = GraphCoord::new(-15.0, -15.0);
+
+        let x_opts = AxisOptions::default();
+        let y_opts = AxisOptions::default();
+
+        let axis = Axis::from_dimensions(&dims, &x_opts, &y_opts);
+
+        assert_eq!(axis.plot(&dims, &mut fake_canvas), Ok(()));
+         // Axis should be drawn all in black
+        assert_eq!(fake_canvas.color, Color(0, 0, 0));
+        // Axis should never clear or show the canvas
+        assert_eq!(fake_canvas.shown, 0);
+        assert_eq!(fake_canvas.cleared, 0)
+    }
+}

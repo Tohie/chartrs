@@ -49,3 +49,43 @@ impl<'a> Plottable for Legend<'a> {
         Ok(())  
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use canvas::mock_canvas::MockCanvas;
+    use canvas::mock_canvas::MockError;
+    use graph_dimensions::GraphDimensions;
+    use pixel::{GraphCoord, Color};
+    use options::DataSetOptions;
+    use data_set::DataSet;
+    use plottable::Plottable;
+
+    #[test]
+    fn test_legend() {
+        let mut fake_canvas = MockCanvas::new();
+        let mut dims = GraphDimensions::new(600.0, 600.0);
+        // Mock is setup so if name is "fail" then it will return an error
+        // so we can test the short circuiting logic in Legend
+        let fail_opts = DataSetOptions::default().name("fail");
+        let pass_opts = DataSetOptions::default().name("pass");
+
+        let data_set_fail = &[&DataSet::from_vecs(vec!(1.0), vec!(2.0), &fail_opts).unwrap()];
+        let data_set_pass = &[&DataSet::from_vecs(vec!(1.0), vec!(2.0), &pass_opts).unwrap()];
+
+        dims.max = GraphCoord::new(1.0, 2.0);
+        dims.min = GraphCoord::new(1.0, 2.0);
+
+        let legend_fail = Legend(data_set_fail);
+        let legend_pass = Legend(data_set_pass);
+
+        assert_eq!(legend_pass.plot(&dims, &mut fake_canvas), Ok(()));
+        assert_eq!(legend_fail.plot(&dims, &mut fake_canvas), Err(MockError("write_text failed".to_string())));
+
+        // Legend should change the color, 1, 1, 1 is default color in MockCanvas
+        assert!(fake_canvas.color != Color(1, 1, 1));
+        // Legend should never clear or show the canvas
+        assert_eq!(fake_canvas.shown, 0);
+        assert_eq!(fake_canvas.cleared, 0)
+    }
+}

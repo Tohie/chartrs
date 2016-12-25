@@ -183,7 +183,7 @@ mod tests {
 
         // When creating a GraphDimensions adjusting for anything should change everything
         let default_ops = DataSetOptions::default();
-        let ds = DataSet::from_fn(vec!(10.0), &default_ops, |x| 10.0);
+        let ds = DataSet::from_fn(vec!(10.0), &default_ops, |_| 10.0);
         dim.adjust_for(&ds);
 
         assert_eq!(dim.max, GraphCoord::new(10.0, 10.0));
@@ -194,7 +194,7 @@ mod tests {
         dim.max = GraphCoord::new(10.0, 10.0);
         dim.min = GraphCoord::new(-10.0, -5.0);
 
-        let ds = DataSet::from_fn(vec!(20.0), &default_ops, |x| -15.0);
+        let ds = DataSet::from_fn(vec!(20.0), &default_ops, |_| -15.0);
         dim.adjust_for(&ds);
 
         assert_eq!(dim.max, GraphCoord::new(20.0, 10.0));
@@ -202,7 +202,7 @@ mod tests {
 
         // Adding a DataSet that doesn't have any values higher or lower than
         // the current extremes shouldn't change anything
-        let ds = DataSet::from_fn(vec!(0.0), &default_ops, |x| 0.0);
+        let ds = DataSet::from_fn(vec!(0.0), &default_ops, |_| 0.0);
         dim.adjust_for(&ds);
 
         assert_eq!(dim.max, GraphCoord::new(20.0, 10.0));

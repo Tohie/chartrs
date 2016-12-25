@@ -28,7 +28,7 @@ impl Into<Pixel> for (f64, f64) {
     } 
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Color(pub u8, pub u8, pub u8);
 
 impl Into<Color> for (u8, u8, u8) {
